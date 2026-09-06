@@ -1,0 +1,32 @@
+@use 'mixins' as *;
+
+.stats-cards {
+  @apply mb-8 flex gap-6;
+
+  .stat-card {
+    @apply flex flex-1 flex-col gap-2 rounded-2xl p-6;
+
+    .stat-label {
+      @apply text-[0.8rem] font-semibold tracking-wide text-gray-600;
+    }
+
+    .stat-value {
+      @apply text-[2.5rem] leading-none font-light;
+    }
+
+    @each $name, $surface, $accent in (
+      (todo, 'bg-gray-50', 'text-gray-700'),
+      (in_progress, 'bg-blue-50', 'text-blue-600'),
+      (blocked, 'bg-red-50', 'text-red-600'),
+      (done, 'bg-green-50', 'text-green-600')
+    ) {
+      &.#{$name}-card {
+        @apply #{$surface};
+
+        .stat-value {
+          @apply #{$accent};
+        }
+      }
+    }
+  }
+}

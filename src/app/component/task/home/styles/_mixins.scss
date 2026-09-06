@@ -1,0 +1,30 @@
+@reference "tailwindcss";
+
+@mixin badge {
+  @apply rounded-xl px-2 py-[0.15rem] text-[0.75rem] font-medium;
+}
+
+@mixin control {
+  @apply w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3;
+  @apply text-[0.95rem] text-gray-900 outline-none transition-colors;
+
+  &::placeholder {
+    @apply text-gray-400;
+  }
+
+  &:focus {
+    @apply border-blue-500 bg-white;
+  }
+}
+
+@mixin button {
+  @apply cursor-pointer border-none font-semibold transition-colors;
+
+  &:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+}
+
+@mixin surface {
+  @apply rounded-2xl border border-gray-200 bg-white;
+}

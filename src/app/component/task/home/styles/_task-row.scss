@@ -1,0 +1,175 @@
+@use 'mixins' as *;
+
+.task-accordion {
+  @include surface;
+  @apply overflow-hidden transition-all duration-300;
+
+  &.expanded {
+    @apply border-gray-300 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)];
+
+    .accordion-header .expand-icon {
+      @apply rotate-180;
+    }
+  }
+
+  .accordion-header {
+    @apply flex cursor-pointer items-start justify-between px-6 py-5 transition-colors duration-200;
+
+    &:hover {
+      @apply bg-gray-50;
+    }
+
+    .header-content {
+      @apply flex flex-1 gap-5;
+
+      .icon-container {
+        @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full;
+
+        @each $name, $tone in (
+          (user, 'bg-blue-50 text-blue-500'),
+          (card, 'bg-orange-50 text-orange-600'),
+          (settings, 'bg-violet-50 text-violet-500'),
+          (dollar, 'bg-green-50 text-green-600')
+        ) {
+          &.#{$name} {
+            @apply #{$tone};
+          }
+        }
+      }
+
+      .main-info {
+        @apply flex flex-col gap-[0.4rem];
+
+        .title-row {
+          @apply flex flex-wrap items-center gap-3;
+
+          .task-title {
+            @apply m-0 text-[1.05rem] font-semibold text-gray-900;
+          }
+
+          &.is-done .task-title {
+            @apply text-gray-400 line-through;
+          }
+
+          .severity-badge {
+            @include badge;
+
+            @each $name, $tone in (
+              (low, 'bg-gray-100 text-gray-600'),
+              (medium, 'bg-yellow-50 text-yellow-600'),
+              (high, 'bg-red-50 text-red-600')
+            ) {
+              &.#{$name} {
+                @apply #{$tone};
+              }
+            }
+          }
+
+          .overdue-badge {
+            @include badge;
+            @apply bg-red-600 text-white;
+          }
+        }
+
+        .description {
+          @apply m-0 text-[0.95rem] text-gray-600;
+        }
+
+        .meta-row {
+          @apply mt-1 flex flex-wrap items-center gap-2 text-[0.85rem] text-gray-500;
+
+          .author {
+            @apply flex items-center gap-[0.35rem];
+          }
+
+          .dot {
+            @apply text-[1.2rem] leading-[0.5];
+          }
+
+          .status-indicator {
+            @apply flex items-center gap-[0.35rem] font-medium;
+
+            @each $name, $tone in (
+              (todo, 'text-gray-600'),
+              (in_progress, 'text-blue-600'),
+              (blocked, 'text-red-600'),
+              (done, 'text-green-600')
+            ) {
+              &.#{$name} {
+                @apply #{$tone};
+              }
+            }
+          }
+        }
+
+        .tag-row {
+          @apply mt-1 flex flex-wrap gap-[0.35rem];
+
+          .tag-chip {
+            @include badge;
+            @apply bg-gray-100 text-gray-600;
+          }
+        }
+      }
+    }
+
+    .expand-icon {
+      @apply flex items-center pt-1 text-gray-400 transition-transform duration-300;
+    }
+  }
+
+  .accordion-body {
+    @apply max-h-0 overflow-hidden transition-[max-height] duration-300 ease-out;
+
+    &.show {
+      @apply max-h-[1000px];
+    }
+
+    .body-content {
+      @apply mt-2 border-t border-gray-100 px-6 pt-6 pb-6;
+
+      .details-heading {
+        @apply m-0 mb-4 text-[0.85rem] font-bold tracking-wide text-gray-600;
+      }
+
+      .details-grid {
+        @apply grid grid-cols-2 gap-4;
+
+        .detail-box {
+          @apply rounded-xl bg-gray-50 px-5 py-4;
+
+          .detail-label {
+            @apply mb-[0.4rem] block text-[0.75rem] font-semibold tracking-wide text-gray-500 uppercase;
+          }
+
+          .value {
+            @apply text-base font-medium break-words text-gray-900;
+          }
+        }
+      }
+
+      .actions-container {
+        @apply mt-6 flex flex-wrap gap-4;
+      }
+    }
+  }
+}
+
+.action-btn {
+  @include button;
+  @apply rounded-lg px-6 py-3 text-[0.9rem];
+
+  @each $name, $tone, $hover in (
+    (primary-btn, 'bg-green-600 text-white', 'bg-green-700'),
+    (danger-btn, 'bg-red-100 text-red-600', 'bg-red-300'),
+    (neutral-btn, 'bg-gray-100 text-gray-700', 'bg-gray-200')
+  ) {
+    &.#{$name} {
+      @apply #{$tone};
+
+      &:not(:disabled):hover {
+        @apply #{$hover};
+      }
+    }
+  }
+}

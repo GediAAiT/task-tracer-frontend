@@ -1,0 +1,66 @@
+@use 'mixins' as *;
+
+.banner {
+  @apply relative mb-10 flex items-center justify-between overflow-hidden rounded-2xl px-12 py-8;
+  @apply bg-gradient-to-br from-blue-900 to-blue-500 shadow-[0_10px_25px_rgba(59,130,246,0.2)];
+
+  .banner-decorations {
+    @apply pointer-events-none absolute top-0 left-0 h-full w-full;
+
+    .circle {
+      @apply absolute rounded-full bg-white/10;
+    }
+
+    @each $name, $size, $position in (
+      (circle-1, 'h-[150px] w-[150px]', '-top-[50px] -left-[50px]'),
+      (circle-2, 'h-[300px] w-[300px]', '-bottom-[150px] right-[10%]'),
+      (circle-3, 'h-[100px] w-[100px]', 'top-[20%] -right-[20px]')
+    ) {
+      .#{$name} {
+        @apply #{$size} #{$position};
+      }
+    }
+  }
+
+  .banner-left {
+    @apply relative z-10 flex items-center gap-6;
+
+    .banner-icon-container {
+      @apply rounded-xl bg-white/20 p-4 text-white backdrop-blur-md;
+    }
+
+    .banner-text {
+      @apply text-white;
+
+      .banner-title {
+        @apply m-0 mb-2 text-[1.8rem] font-bold;
+      }
+
+      .banner-subtitle {
+        @apply m-0 text-base opacity-90;
+      }
+    }
+  }
+
+  .banner-right {
+    @apply relative z-10 flex gap-6;
+
+    .stat-circle {
+      @apply flex h-[120px] w-[120px] flex-col items-center justify-center rounded-full p-5;
+      @apply border border-white/20 bg-white/15 text-center text-white backdrop-blur-sm;
+      @apply transition-transform duration-300;
+
+      &:hover {
+        @apply -translate-y-[5px] bg-white/25;
+      }
+
+      .stat-number {
+        @apply mb-1 text-[2rem] leading-none font-bold;
+      }
+
+      .stat-label {
+        @apply text-[0.8rem] font-medium opacity-90;
+      }
+    }
+  }
+}

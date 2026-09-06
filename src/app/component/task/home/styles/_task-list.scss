@@ -1,0 +1,9 @@
+@use 'mixins' as *;
+
+.tasks-list {
+  @apply flex flex-col gap-4;
+
+  &.is-loading {
+    @apply opacity-60 transition-opacity;
+  }
+}

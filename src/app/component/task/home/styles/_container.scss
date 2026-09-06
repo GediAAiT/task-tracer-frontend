@@ -1,0 +1,13 @@
+@use 'mixins' as *;
+
+.tasks-container {
+  @apply mx-auto min-h-screen max-w-[1000px] bg-white p-8 font-sans text-gray-900;
+}
+
+.header-section {
+  @apply mb-6;
+
+  .subtitle {
+    @apply m-0 text-base text-gray-600;
+  }
+}

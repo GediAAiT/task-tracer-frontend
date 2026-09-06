@@ -1,0 +1,48 @@
+@use 'mixins' as *;
+
+.create-panel {
+  @include surface;
+  @apply mb-8 p-6;
+
+  .panel-heading {
+    @apply m-0 mb-4 text-[1.05rem] font-semibold text-gray-900;
+  }
+
+  .form-grid {
+    @apply grid grid-cols-2 gap-4;
+
+    .form-field {
+      @apply flex flex-col gap-[0.4rem];
+
+      &.full-width {
+        @apply col-span-2;
+      }
+
+      .field-label {
+        @apply text-[0.75rem] font-semibold tracking-wide text-gray-500 uppercase;
+      }
+
+      .field-input,
+      .field-select {
+        @include control;
+      }
+
+      .field-textarea {
+        @include control;
+        @apply resize-y;
+      }
+
+      .field-hint {
+        @apply text-[0.75rem] text-gray-400;
+      }
+    }
+  }
+
+  .form-errors {
+    @apply mt-4 list-inside list-disc rounded-xl bg-red-50 px-4 py-3 text-[0.85rem] text-red-600;
+  }
+
+  .form-actions {
+    @apply mt-6 flex gap-4;
+  }
+}

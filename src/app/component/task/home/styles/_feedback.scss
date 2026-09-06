@@ -1,0 +1,32 @@
+@use 'mixins' as *;
+
+.error-banner {
+  @apply mb-6 flex items-center justify-between gap-4 rounded-2xl bg-red-50 px-6 py-4;
+  @apply text-[0.9rem] text-red-600;
+
+  .retry-btn {
+    @include button;
+    @apply rounded-lg bg-red-600 px-4 py-2 text-[0.8rem] text-white;
+
+    &:hover {
+      @apply bg-red-700;
+    }
+  }
+}
+
+.empty-state {
+  @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300;
+  @apply bg-white px-8 py-16 text-gray-400;
+
+  svg {
+    @apply mb-4 opacity-50;
+  }
+
+  p {
+    @apply m-0 text-[1.1rem];
+  }
+}
+
+.skeleton-row {
+  @apply h-[92px] animate-pulse rounded-2xl border border-gray-200 bg-gray-50;
+}

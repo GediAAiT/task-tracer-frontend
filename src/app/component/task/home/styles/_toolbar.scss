@@ -1,0 +1,19 @@
+@use 'mixins' as *;
+
+.toolbar {
+  @apply mb-8 flex flex-wrap items-center gap-4;
+
+  .search-field {
+    @include control;
+    @apply min-w-[240px] flex-1;
+  }
+
+  .new-task-btn {
+    @include button;
+    @apply rounded-xl bg-blue-600 px-6 py-3 text-[0.9rem] text-white;
+
+    &:hover {
+      @apply bg-blue-700;
+    }
+  }
+}

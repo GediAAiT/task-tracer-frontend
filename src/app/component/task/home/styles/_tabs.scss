@@ -1,0 +1,18 @@
+@use 'mixins' as *;
+
+.tabs-container {
+  @apply mb-6 flex w-fit gap-2 rounded-[30px] bg-gray-100 p-[0.35rem];
+
+  .tab-btn {
+    @include button;
+    @apply rounded-[20px] bg-transparent px-5 py-[0.6rem] text-[0.9rem] font-medium text-gray-600;
+
+    &:hover {
+      @apply text-gray-900;
+    }
+
+    &.active {
+      @apply bg-white text-gray-900 shadow-sm;
+    }
+  }
+}
