@@ -22,7 +22,10 @@ export class HttpErrorResponse extends Error {
 
 export class NetworkError extends Error {
   constructor(cause: unknown) {
-    super(`Could not reach the API at ${environment.apiUrl}. Is the backend running?`);
+    const target = environment.apiUrl.startsWith('http')
+      ? `the API at ${environment.apiUrl}`
+      : 'the API';
+    super(`Could not reach ${target}. Is the backend running?`);
     this.name = 'NetworkError';
     this.cause = cause;
   }
@@ -37,14 +40,17 @@ export interface RequestOptions {
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
+
 function buildUrl(path: string, query?: QueryParams): string {
-  const url = new URL(environment.apiUrl + path);
+  const search = new URLSearchParams();
   if (query) {
     for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value !== undefined) search.set(key, String(value));
     }
   }
-  return url.toString();
+
+  const queryString = search.toString();
+  return environment.apiUrl + path + (queryString ? `?${queryString}` : '');
 }
 
 async function readErrorBody(response: Response): Promise<ErrorResponse | null> {

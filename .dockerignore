@@ -1,0 +1,36 @@
+# Dependencies and build output are produced inside the image
+node_modules
+.next
+out
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# VCS and tooling
+.git
+.gitignore
+.github
+.idea
+.vscode
+eslint.config.mjs
+
+# Secrets and local config — the image never bakes these in
+.env
+.env.*
+
+# Tests and coverage
+coverage
+.nyc_output
+
+# Docker's own files
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Docs, logs, OS cruft
+README.md
+AGENTS.md
+CLAUDE.md
+*.log
+.DS_Store

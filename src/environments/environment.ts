@@ -1,4 +1,7 @@
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
 export const environment = {
   production: process.env.NODE_ENV === 'production',
-  apiUrl: process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ?? 'http://localhost:3000',
+
+  apiUrl: configuredApiUrl ? configuredApiUrl.replace(/\/$/, '') : '/api',
 };
