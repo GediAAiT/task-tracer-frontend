@@ -1,31 +1,48 @@
 @use 'mixins' as *;
 
 .stats-cards {
-  @apply mb-8 flex gap-6;
+  @apply mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:grid-cols-4 sm:gap-4 lg:gap-6;
 
   .stat-card {
-    @apply flex flex-1 flex-col gap-2 rounded-2xl p-6;
+    @apply flex min-w-0 flex-col gap-1 rounded-2xl p-4 sm:gap-2 sm:p-5 lg:p-6;
 
     .stat-label {
-      @apply text-[0.8rem] font-semibold tracking-wide text-gray-600;
+      @apply text-[0.7rem] font-semibold tracking-wide text-gray-600 sm:text-[0.8rem];
     }
 
     .stat-value {
-      @apply text-[2.5rem] leading-none font-light;
+      @apply text-[1.75rem] leading-none font-light sm:text-[2rem] lg:text-[2.5rem];
     }
 
-    @each $name, $surface, $accent in (
-      (todo, 'bg-gray-50', 'text-gray-700'),
-      (in_progress, 'bg-blue-50', 'text-blue-600'),
-      (blocked, 'bg-red-50', 'text-red-600'),
-      (done, 'bg-green-50', 'text-green-600')
-    ) {
-      &.#{$name}-card {
-        @apply #{$surface};
+    &.todo-card {
+      @apply bg-gray-50;
 
-        .stat-value {
-          @apply #{$accent};
-        }
+      .stat-value {
+        @apply text-gray-700;
+      }
+    }
+
+    &.in_progress-card {
+      @apply bg-blue-50;
+
+      .stat-value {
+        @apply text-blue-600;
+      }
+    }
+
+    &.blocked-card {
+      @apply bg-red-50;
+
+      .stat-value {
+        @apply text-red-600;
+      }
+    }
+
+    &.done-card {
+      @apply bg-green-50;
+
+      .stat-value {
+        @apply text-green-600;
       }
     }
   }

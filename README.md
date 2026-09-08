@@ -2,6 +2,24 @@
 
 Next.js 16 (App Router) UI for the [Task Tracer API](../task-tracer-backend).
 
+## Routes
+
+The UI is served under a locale prefix, so the home screen lives at `/en/home`:
+
+| Route         | Behaviour                                            |
+| ------------- | ---------------------------------------------------- |
+| `/`           | Redirects to `/en/home` (`DEFAULT_LOCALE`).          |
+| `/en`         | Redirects to `/en/home`.                             |
+| `/en/home`    | The task list.                                       |
+| `/xx/home`    | 404 — `xx` is not in `LOCALES`.                      |
+
+`src/app/model/i18n/locale.ts` holds the supported locales; `en` is the only one
+today. Both `[lang]` pages validate the segment against that list and call
+`notFound()` otherwise, so an unsupported locale 404s instead of quietly serving
+English at a URL that promises another language.
+
+`/api/*` sits outside `[lang]` — the proxy route is not localised.
+
 ## How the frontend reaches the API
 
 The task store is a client-side store (`'use client'`), so every request is made
@@ -29,6 +47,28 @@ Two things fall out of this that are worth knowing:
 To bypass the proxy and have the browser call the backend directly, set
 `NEXT_PUBLIC_API_URL` at **build** time (the backend already enables CORS).
 
+## Seeing the API's Redis cache
+
+`GET /tasks` is cached in Redis by the backend, so the rows on screen are not always the rows in Postgres.
+The API reports what it did in `X-Cache`, `X-Cache-Age`, `X-Cache-Key` and `X-Cache-Invalidation` headers,
+and the UI surfaces them rather than leaving a stale list to be discovered by accident:
+
+- `httpClient.getWithHeaders` keeps the response headers instead of discarding them, since only the headers
+  distinguish a replayed page from a fresh one.
+- `src/app/model/task/cache.ts` parses them into `CacheDiagnostics`. Every field degrades to `null` rather
+  than throwing, so a backend without these headers still renders.
+- The store keeps the result as `listCache`, and a badge above the list shows the status, the age of the
+  snapshot, and the key it came from. **Reload list** re-reads the current query without changing filters.
+
+When the backend has invalidation switched off (`TASKS_CACHE_BREAK_INVALIDATION`), the badge says so and
+warns that the rows may be missing recent writes. That is the difference between a list that looks wrong and
+one that explains why it is wrong.
+
+The proxy forwards these headers untouched; it only strips hop-by-hop headers plus `content-encoding` and
+`content-length`. Nothing on the frontend adds a second layer of caching: the proxy and the browser fetch
+both use `cache: 'no-store'`, and Next.js does not cache route handlers by default, so Redis is the only
+cache in the path.
+
 ## Running with Docker
 
 The backend's own compose project owns Postgres and the API, so this compose file
@@ -48,7 +88,7 @@ cd ../task-tracer-frontend
 docker compose up --build
 ```
 
-The UI is on <http://localhost:3001>.
+The UI is on <http://localhost:3001> (which lands on `/en/home`).
 
 ### Configuration
 
@@ -81,7 +121,7 @@ pnpm install
 pnpm dev
 ```
 
-Runs on <http://localhost:3001>. Requests to `/api/*` are proxied to
+Runs on <http://localhost:3001>, landing on `/en/home`. Requests to `/api/*` are proxied to
 `http://localhost:3000` by default, which is where the backend listens locally —
 so `pnpm dev` and Docker behave the same way, with no code change between them.
 

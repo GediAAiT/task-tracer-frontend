@@ -1,16 +1,16 @@
 @use 'mixins' as *;
 
 .toolbar {
-  @apply mb-8 flex flex-wrap items-center gap-4;
+  @apply mb-6 flex flex-wrap items-center gap-3 sm:mb-8 sm:gap-4;
 
   .search-field {
     @include control;
-    @apply min-w-[240px] flex-1;
+    @apply min-w-0 flex-1 sm:min-w-[240px];
   }
 
   .new-task-btn {
     @include button;
-    @apply rounded-xl bg-blue-600 px-6 py-3 text-[0.9rem] text-white;
+    @apply w-full rounded-xl bg-blue-600 px-5 py-3 text-[0.9rem] text-white sm:w-auto sm:px-6;
 
     &:hover {
       @apply bg-blue-700;

@@ -1,4 +1,5 @@
 import type { BannerVm } from './banner.vm';
+import type { CacheBadgeVm } from './cache-badge.vm';
 import type { CreatePanelVm } from './create-panel.vm';
 import type { FeedbackVm } from './feedback.vm';
 import type { PaginationVm } from './pagination.vm';
@@ -13,6 +14,7 @@ export interface HomeVm {
   statCards: StatCardVm[];
   tabs: TabVm[];
   toolbar: ToolbarVm;
+  cacheBadge: CacheBadgeVm;
   createPanel: CreatePanelVm;
   feedback: FeedbackVm;
   list: TaskListVm;

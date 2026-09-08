@@ -38,8 +38,12 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 
-type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+export interface HttpResponse<T> {
+  data: T;
+  headers: Headers;
+}
 
+type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 function buildUrl(path: string, query?: QueryParams): string {
   const search = new URLSearchParams();
@@ -74,7 +78,7 @@ async function request<T>(
   path: string,
   body: unknown,
   options: RequestOptions = {},
-): Promise<T> {
+): Promise<HttpResponse<T>> {
   let response: Response;
 
   try {
@@ -95,17 +99,34 @@ async function request<T>(
     throw new HttpErrorResponse(response.status, describeFailure(response, parsed), parsed);
   }
 
-  if (response.status === 204) return undefined as T;
+  if (response.status === 204) {
+    return { data: undefined as T, headers: response.headers };
+  }
+
   const text = await response.text();
-  return (text ? JSON.parse(text) : undefined) as T;
+  return {
+    data: (text ? JSON.parse(text) : undefined) as T,
+    headers: response.headers,
+  };
+}
+
+async function body<T>(
+  method: HttpMethod,
+  path: string,
+  payload: unknown,
+  options?: RequestOptions,
+): Promise<T> {
+  return (await request<T>(method, path, payload, options)).data;
 }
 
 export const httpClient = {
-  get: <T>(path: string, options?: RequestOptions) => request<T>('GET', path, undefined, options),
-  post: <T>(path: string, body: unknown, options?: RequestOptions) =>
-    request<T>('POST', path, body, options),
-  patch: <T>(path: string, body: unknown, options?: RequestOptions) =>
-    request<T>('PATCH', path, body, options),
+  get: <T>(path: string, options?: RequestOptions) => body<T>('GET', path, undefined, options),
+  getWithHeaders: <T>(path: string, options?: RequestOptions) =>
+    request<T>('GET', path, undefined, options),
+  post: <T>(path: string, payload: unknown, options?: RequestOptions) =>
+    body<T>('POST', path, payload, options),
+  patch: <T>(path: string, payload: unknown, options?: RequestOptions) =>
+    body<T>('PATCH', path, payload, options),
   delete: <T>(path: string, options?: RequestOptions) =>
-    request<T>('DELETE', path, undefined, options),
+    body<T>('DELETE', path, undefined, options),
 };

@@ -16,6 +16,11 @@ import {
   type TaskFormValues,
   type TaskStatus,
 } from '@/app/model/task/task';
+import {
+  isServingStale,
+  type CacheDiagnostics,
+  type CacheStatus,
+} from '@/app/model/task/cache';
 import type { OptionVm } from '@/app/model/task/view/field.vm';
 import type { StatCardVm } from '@/app/model/task/view/stat-card.vm';
 import type { TabVm } from '@/app/model/task/view/tab.vm';
@@ -79,6 +84,43 @@ function formatDate(iso: string | null): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+const CACHE_STATUS_LABELS: Record<CacheStatus, string> = {
+  HIT: 'Redis hit',
+  MISS: 'Redis miss',
+  BYPASS: 'Cache bypassed',
+  UNKNOWN: 'Cache unknown',
+};
+
+function formatAge(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return remainder === 0 ? `${minutes}m` : `${minutes}m ${remainder}s`;
+}
+
+function describeCache(cache: CacheDiagnostics): string {
+  switch (cache.status) {
+    case 'HIT':
+      return cache.ageSeconds === null
+        ? 'Replayed from Redis — the database was not read.'
+        : `Replayed from Redis — this snapshot was computed ${formatAge(cache.ageSeconds)} ago.`;
+    case 'MISS':
+      return 'Read from the database and stored in Redis for the next request.';
+    case 'BYPASS':
+      return 'Redis was unreachable, so the list came straight from the database.';
+    default:
+      return 'The API did not report a cache status for this list.';
+  }
+}
+
+function cacheWarning(cache: CacheDiagnostics): string | null {
+  if (cache.invalidationEnabled !== false) return null;
+
+  return isServingStale(cache)
+    ? 'Invalidation is switched off on the API: these rows are a cached snapshot, so anything written since it was cached is missing.'
+    : 'Invalidation is switched off on the API, so the next write will not retire this cached page.';
 }
 
 function pickIcon(task: Task): RowIconName {
@@ -206,6 +248,7 @@ export function HomeComponent() {
     };
   });
 
+  const cache = store.listCache;
   const meta = store.meta;
   const firstOnPage = meta ? (meta.page - 1) * meta.limit + 1 : 0;
   const lastOnPage = meta ? Math.min(meta.page * meta.limit, meta.total) : 0;
@@ -220,6 +263,17 @@ export function HomeComponent() {
         search: { value: search, onChange: (event) => setSearch(event.target.value) },
         newTaskLabel: createOpen ? 'Close form' : 'New task',
         onToggleCreate: () => (createOpen ? closeCreatePanel() : setCreateOpen(true)),
+      }}
+      cacheBadge={{
+        visible: cache !== null,
+        statusLabel: cache ? CACHE_STATUS_LABELS[cache.status] : '',
+        modifier: cache ? cache.status.toLowerCase() : 'unknown',
+        detail: cache ? describeCache(cache) : '',
+        keyLabel: cache?.key ?? null,
+        warning: cache ? cacheWarning(cache) : null,
+        reloadLabel: store.loading ? 'Reloading…' : 'Reload list',
+        reloadDisabled: store.loading,
+        onReload: () => void methods.getAllTasks(),
       }}
       createPanel={{
         open: createOpen,

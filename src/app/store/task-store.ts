@@ -8,6 +8,7 @@ import type {
   TaskStats,
   UpdateTaskInput,
 } from '@/app/model/task/task';
+import type { CacheDiagnostics } from '@/app/model/task/cache';
 import { HttpErrorResponse, NetworkError } from '@/app/service/http/http-client';
 import { taskService } from '@/app/service/task/task.service';
 
@@ -18,6 +19,7 @@ export interface TaskState {
   meta: PaginationMeta | null;
   listStatus: LoadStatus;
   listError: string | null;
+  listCache: CacheDiagnostics | null;
 
   stats: TaskStats | null;
   statsStatus: LoadStatus;
@@ -41,6 +43,7 @@ const INITIAL_STATE: TaskState = {
   meta: null,
   listStatus: 'idle',
   listError: null,
+  listCache: null,
   stats: null,
   statsStatus: 'idle',
   statsError: null,
@@ -94,9 +97,15 @@ async function loadTasks(): Promise<void> {
   setState({ listStatus: 'loading', listError: null });
 
   try {
-    const page = await taskService.getAllTasks(state.query, controller.signal);
+    const { page, cache } = await taskService.getAllTasks(state.query, controller.signal);
     if (generation !== listGeneration) return;
-    setState({ items: page.items, meta: page.meta, listStatus: 'ready', listError: null });
+    setState({
+      items: page.items,
+      meta: page.meta,
+      listCache: cache,
+      listStatus: 'ready',
+      listError: null,
+    });
   } catch (error) {
 
     if (isAbort(error) || generation !== listGeneration) return;
@@ -119,17 +128,10 @@ async function loadStats(): Promise<void> {
   }
 }
 
-/** Load the list and the stats together, since one screen shows both. */
 async function refresh(): Promise<void> {
   await Promise.all([loadTasks(), loadStats()]);
 }
 
-/**
- * Apply filter changes and reload.
- *
- * Changing a filter resets to page 1: staying on page 7 of a result set that now
- * has two pages would show an empty list.
- */
 function setQuery(patch: Partial<TaskQuery>): void {
   const isPageChange = 'page' in patch && Object.keys(patch).length === 1;
   const query: TaskQuery = { ...state.query, ...patch };
@@ -138,7 +140,6 @@ function setQuery(patch: Partial<TaskQuery>): void {
   void loadTasks();
 }
 
-/** Reset every filter back to the defaults. */
 function clearFilters(): void {
   setState({ query: DEFAULT_QUERY });
   void loadTasks();
@@ -148,10 +149,6 @@ function goToPage(page: number): void {
   setQuery({ page });
 }
 
-/**
- * POST /tasks, then reload so the new task lands in the right place for the
- * current sort and filters. Resolves to the created task, or null on failure.
- */
 async function createTask(input: CreateTaskInput): Promise<Task | null> {
   setState({ creating: true, createErrors: [] });
   try {
@@ -166,14 +163,6 @@ async function createTask(input: CreateTaskInput): Promise<Task | null> {
   }
 }
 
-/**
- * PATCH /tasks/:id.
- *
- * The response replaces the row in place rather than triggering a refetch, so the
- * list does not reshuffle while the user is working in it. Stats are refreshed,
- * since a status change moves the counters. If the edited task is open in the
- * detail view, that copy is updated too.
- */
 async function updateTask(id: string, input: UpdateTaskInput): Promise<Task | null> {
   if (state.updatingIds.includes(id)) return null;
   setState({ updatingIds: [...state.updatingIds, id], listError: null });
@@ -198,10 +187,8 @@ async function updateTask(id: string, input: UpdateTaskInput): Promise<Task | nu
 
 let detailGeneration = 0;
 
-/** GET /tasks/:id for the detail view. */
 async function loadTask(id: string): Promise<void> {
   const generation = ++detailGeneration;
-  // Keep the previous task on screen only when it is the one being reloaded.
   setState({
     detailStatus: 'loading',
     detailError: null,
@@ -222,7 +209,6 @@ function clearCreateErrors(): void {
   if (state.createErrors.length > 0) setState({ createErrors: [] });
 }
 
-/** Stable object — safe to use in effect dependency lists. */
 export const taskActions = {
   refresh,
   loadTasks,
@@ -236,29 +222,16 @@ export const taskActions = {
   clearCreateErrors,
 } as const;
 
-/** Escape hatch for non-React callers and tests. */
 export const taskStore = {
   getState: getSnapshot,
   subscribe,
   actions: taskActions,
 };
 
-/* -------------------------------------------------------------------------- */
-/* React binding                                                              */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Subscribe a component to the store.
- *
- * Returns the whole state; because state is only replaced when something actually
- * changed, this re-renders no more often than a selector would at the sizes this
- * screen deals in.
- */
 export function useTaskStore(): TaskState {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
-/** The actions alone, for components that dispatch but do not read. */
 export function useTaskActions(): typeof taskActions {
   return taskActions;
 }

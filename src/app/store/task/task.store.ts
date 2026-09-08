@@ -12,6 +12,7 @@ import {
   type TaskTab,
   type UpdateTaskInput,
 } from '@/app/model/task/task';
+import type { CacheDiagnostics } from '@/app/model/task/cache';
 import { HttpErrorResponse, NetworkError } from '@/app/service/http/http-client';
 import { taskService } from '@/app/service/task/task.service';
 
@@ -21,6 +22,7 @@ interface TaskState {
   loading: boolean;
   entities: Task[];
   meta: PaginationMeta | null;
+  listCache: CacheDiagnostics | null;
   stats: TaskStats | null;
   query: TaskQuery;
   expandedTaskId: string | null;
@@ -44,6 +46,7 @@ const initialState: TaskState = {
   loading: false,
   entities: [],
   meta: null,
+  listCache: null,
   stats: null,
   query: DEFAULT_QUERY,
   expandedTaskId: null,
@@ -111,9 +114,15 @@ async function getAllTasks(): Promise<void> {
   patchState({ loading: true, serverError: null });
 
   try {
-    const page = await taskService.getAllTasks(state.query, controller.signal);
+    const { page, cache } = await taskService.getAllTasks(state.query, controller.signal);
     if (listGuard.isStale(generation)) return;
-    patchState({ entities: page.items, meta: page.meta, loading: false, serverError: null });
+    patchState({
+      entities: page.items,
+      meta: page.meta,
+      listCache: cache,
+      loading: false,
+      serverError: null,
+    });
   } catch (err) {
     if (isAbort(err) || listGuard.isStale(generation)) return;
     updateServerError(err);
