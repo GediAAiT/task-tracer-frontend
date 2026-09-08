@@ -6,12 +6,12 @@ Next.js 16 (App Router) UI for the [Task Tracer API](../task-tracer-backend).
 
 The UI is served under a locale prefix, so the home screen lives at `/en/home`:
 
-| Route         | Behaviour                                            |
-| ------------- | ---------------------------------------------------- |
-| `/`           | Redirects to `/en/home` (`DEFAULT_LOCALE`).          |
-| `/en`         | Redirects to `/en/home`.                             |
-| `/en/home`    | The task list.                                       |
-| `/xx/home`    | 404 — `xx` is not in `LOCALES`.                      |
+| Route      | Behaviour                                   |
+| ---------- | ------------------------------------------- |
+| `/`        | Redirects to `/en/home` (`DEFAULT_LOCALE`). |
+| `/en`      | Redirects to `/en/home`.                    |
+| `/en/home` | The task list.                              |
+| `/xx/home` | 404 — `xx` is not in `LOCALES`.             |
 
 `src/app/model/i18n/locale.ts` holds the supported locales; `en` is the only one
 today. Both `[lang]` pages validate the segment against that list and call
