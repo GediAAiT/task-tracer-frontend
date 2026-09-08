@@ -11,7 +11,7 @@
   .tab-btn {
     @include button;
     @apply shrink-0 rounded-[20px] bg-transparent whitespace-nowrap text-gray-600;
-    @apply px-4 py-[0.5rem] text-[0.85rem] font-medium sm:px-5 sm:py-[0.6rem] sm:text-[0.9rem];
+    @apply px-4 py-2 text-[0.85rem] font-medium sm:px-5 sm:py-[0.6rem] sm:text-[0.9rem];
 
     &:hover {
       @apply text-gray-900;

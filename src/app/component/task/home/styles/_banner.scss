@@ -4,7 +4,7 @@
   @apply relative flex min-w-0 flex-col items-start gap-6 overflow-hidden rounded-2xl;
   @apply mb-6 px-5 py-6 sm:mb-8 sm:px-8 sm:py-7 lg:mb-10 lg:px-12 lg:py-8;
   @apply md:flex-row md:items-center md:justify-between;
-  @apply bg-gradient-to-br from-blue-900 to-blue-500 shadow-[0_10px_25px_rgba(59,130,246,0.2)];
+  @apply bg-linear-to-br from-blue-900 to-blue-500 shadow-[0_10px_25px_rgba(59,130,246,0.2)];
 
   .banner-decorations {
     @apply pointer-events-none absolute top-0 left-0 h-full w-full;
@@ -14,15 +14,15 @@
     }
 
     .circle-1 {
-      @apply h-[150px] w-[150px] -top-[50px] -left-[50px];
+      @apply h-37.5 w-37.5 -top-12.5 -left-12.5;
     }
 
     .circle-2 {
-      @apply h-[300px] w-[300px] -bottom-[150px] right-[10%];
+      @apply h-75 w-75 -bottom-37.5 right-[10%];
     }
 
     .circle-3 {
-      @apply h-[100px] w-[100px] top-[20%] -right-[20px];
+      @apply h-25 w-25 top-[20%] -right-5;
     }
   }
 
@@ -51,13 +51,13 @@
 
     .stat-circle {
       @apply flex min-w-0 flex-1 flex-col items-center justify-center rounded-full p-3 sm:flex-none sm:p-5;
-      @apply aspect-square max-w-[120px] sm:aspect-auto sm:max-w-none;
-      @apply sm:h-[110px] sm:w-[110px] lg:h-[120px] lg:w-[120px];
+      @apply aspect-square max-w-30 sm:aspect-auto sm:max-w-none;
+      @apply sm:h-27.5 sm:w-27.5 lg:h-30 lg:w-30;
       @apply border border-white/20 bg-white/15 text-center text-white backdrop-blur-sm;
       @apply transition-transform duration-300;
 
       &:hover {
-        @apply -translate-y-[5px] bg-white/25;
+        @apply -translate-y-1.25 bg-white/25;
       }
 
       .stat-number {

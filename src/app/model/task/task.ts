@@ -44,10 +44,7 @@ export interface CreateTaskInput {
   tags?: string[];
 }
 
-/**
- * PATCH /tasks/{id} body. Omit a field to keep it as-is; send `null` to clear
- * description, dueDate or assignee, and `[]` to clear the tags.
- */
+
 export interface UpdateTaskInput {
   title?: string;
   description?: string | null;
@@ -200,7 +197,6 @@ export function toTaskInput(values: TaskFormValues): CreateTaskInput {
   return input;
 }
 
-/** Fills the edit form with the task as it currently stands. */
 export function toFormValues(task: Task): TaskFormValues {
   return {
     title: task.title,
@@ -213,7 +209,6 @@ export function toFormValues(task: Task): TaskFormValues {
   };
 }
 
-/** Every editable field is sent, so a field the user emptied is cleared on the API too. */
 export function toTaskUpdate(values: TaskFormValues): UpdateTaskInput {
   return {
     title: values.title.trim(),

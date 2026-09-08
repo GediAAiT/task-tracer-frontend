@@ -1,7 +1,7 @@
 @use 'mixins' as *;
 
 .tasks-container {
-  @apply mx-auto min-h-screen w-full min-w-0 max-w-[1000px] bg-white font-sans text-gray-900;
+  @apply mx-auto min-h-screen w-full min-w-0 max-w-250 bg-white font-sans text-gray-900;
   @apply p-4 sm:p-6 lg:p-8;
 }
 

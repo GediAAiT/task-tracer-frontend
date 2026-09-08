@@ -1,7 +1,6 @@
 import type { FormEventHandler } from 'react';
 import type { FieldVm, OptionVm } from './field.vm';
 
-/** The seven editable task fields, shared by the create panel and the row editor. */
 export interface TaskFormVm {
   title: FieldVm;
   description: FieldVm;
