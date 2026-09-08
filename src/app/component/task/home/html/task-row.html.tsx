@@ -1,4 +1,5 @@
 import type { TaskRowVm } from '@/app/model/task/view/task-row.vm';
+import { EditPanelSection } from './edit-panel.html';
 import { ChevronDownIcon, PersonIcon, RowIcon, StatusIcon } from './icons.html';
 
 export function TaskRowSection({ row }: { row: TaskRowVm }) {
@@ -58,31 +59,37 @@ export function TaskRowSection({ row }: { row: TaskRowVm }) {
 
       <div className={row.expanded ? 'accordion-body show' : 'accordion-body'}>
         <div className="body-content">
-          <h4 className="details-heading">TASK DETAILS</h4>
+          {row.editPanel ? (
+            <EditPanelSection panel={row.editPanel} />
+          ) : (
+            <>
+              <h4 className="details-heading">TASK DETAILS</h4>
 
-          <div className="details-grid">
-            {row.details.map((detail) => (
-              <div key={detail.key} className="detail-box">
-                <span className="detail-label">{detail.label}</span>
-                <div className="value">{detail.value}</div>
+              <div className="details-grid">
+                {row.details.map((detail) => (
+                  <div key={detail.key} className="detail-box">
+                    <span className="detail-label">{detail.label}</span>
+                    <div className="value">{detail.value}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {row.actions.length > 0 && (
-            <div className="actions-container">
-              {row.actions.map((action) => (
-                <button
-                  key={action.key}
-                  type="button"
-                  className={`action-btn ${action.modifier}`}
-                  disabled={action.disabled}
-                  onClick={action.onSelect}
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
+              {row.actions.length > 0 && (
+                <div className="actions-container">
+                  {row.actions.map((action) => (
+                    <button
+                      key={action.key}
+                      type="button"
+                      className={`action-btn ${action.modifier}`}
+                      disabled={action.disabled}
+                      onClick={action.onSelect}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

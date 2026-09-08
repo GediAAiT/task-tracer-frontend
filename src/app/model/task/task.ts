@@ -44,7 +44,19 @@ export interface CreateTaskInput {
   tags?: string[];
 }
 
-export type UpdateTaskInput = Partial<CreateTaskInput>;
+/**
+ * PATCH /tasks/{id} body. Omit a field to keep it as-is; send `null` to clear
+ * description, dueDate or assignee, and `[]` to clear the tags.
+ */
+export interface UpdateTaskInput {
+  title?: string;
+  description?: string | null;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  dueDate?: string | null;
+  assignee?: string | null;
+  tags?: string[];
+}
 
 export interface TaskQuery {
   status?: TaskStatus;
@@ -138,6 +150,34 @@ export function isOverdue(task: Task, now: Date = new Date()): boolean {
   return new Date(task.dueDate).getTime() < now.getTime();
 }
 
+function parseTags(raw: string): string[] {
+  return Array.from(
+    new Set(
+      raw
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function parseDueDate(raw: string): string | null {
+  if (!raw) return null;
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+function toDateTimeLocal(iso: string | null): string {
+  if (!iso) return '';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (part: number) => String(part).padStart(2, '0');
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+}
+
 export function toTaskInput(values: TaskFormValues): CreateTaskInput {
   const input: CreateTaskInput = {
     title: values.title.trim(),
@@ -151,20 +191,37 @@ export function toTaskInput(values: TaskFormValues): CreateTaskInput {
   const assignee = values.assignee.trim();
   if (assignee) input.assignee = assignee;
 
-  if (values.dueDate) {
-    const parsed = new Date(values.dueDate);
-    if (!Number.isNaN(parsed.getTime())) input.dueDate = parsed.toISOString();
-  }
+  const dueDate = parseDueDate(values.dueDate);
+  if (dueDate) input.dueDate = dueDate;
 
-  const tags = Array.from(
-    new Set(
-      values.tags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-    ),
-  );
+  const tags = parseTags(values.tags);
   if (tags.length > 0) input.tags = tags;
 
   return input;
+}
+
+/** Fills the edit form with the task as it currently stands. */
+export function toFormValues(task: Task): TaskFormValues {
+  return {
+    title: task.title,
+    description: task.description ?? '',
+    status: task.status,
+    priority: task.priority,
+    dueDate: toDateTimeLocal(task.dueDate),
+    assignee: task.assignee ?? '',
+    tags: task.tags.join(', '),
+  };
+}
+
+/** Every editable field is sent, so a field the user emptied is cleared on the API too. */
+export function toTaskUpdate(values: TaskFormValues): UpdateTaskInput {
+  return {
+    title: values.title.trim(),
+    description: values.description.trim() || null,
+    status: values.status,
+    priority: values.priority,
+    dueDate: parseDueDate(values.dueDate),
+    assignee: values.assignee.trim() || null,
+    tags: parseTags(values.tags),
+  };
 }

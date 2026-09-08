@@ -1,20 +1,5 @@
-import type { FormEventHandler } from 'react';
-import type { FieldVm, OptionVm } from './field.vm';
+import type { TaskFormPanelVm } from './task-form.vm';
 
-export interface CreatePanelVm {
+export interface CreatePanelVm extends TaskFormPanelVm {
   open: boolean;
-  submitLabel: string;
-  submitDisabled: boolean;
-  errors: readonly string[];
-  title: FieldVm;
-  description: FieldVm;
-  status: FieldVm;
-  priority: FieldVm;
-  dueDate: FieldVm;
-  assignee: FieldVm;
-  tags: FieldVm;
-  statusOptions: OptionVm[];
-  priorityOptions: OptionVm[];
-  onSubmit: FormEventHandler<HTMLFormElement>;
-  onCancel: () => void;
 }

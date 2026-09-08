@@ -1,6 +1,5 @@
 import type { HomeVm } from '@/app/model/task/view/home.vm';
 import { BannerSection } from './html/banner.html';
-import { CacheBadgeSection } from './html/cache-badge.html';
 import { CreatePanelSection } from './html/create-panel.html';
 import { FeedbackSection } from './html/feedback.html';
 import { PaginationSection } from './html/pagination.html';
@@ -21,7 +20,6 @@ export function HomeTemplate(props: HomeVm) {
       <StatCardsSection cards={props.statCards} />
       <TabsSection tabs={props.tabs} />
       <ToolbarSection toolbar={props.toolbar} />
-      <CacheBadgeSection badge={props.cacheBadge} />
       <CreatePanelSection panel={props.createPanel} />
       <FeedbackSection feedback={props.feedback} />
       <TaskListSection list={props.list} />

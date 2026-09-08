@@ -1,4 +1,5 @@
 import type { KeyboardEventHandler } from 'react';
+import type { EditPanelVm } from './edit-panel.vm';
 
 export type RowIconName = 'user' | 'card' | 'settings' | 'dollar';
 
@@ -36,6 +37,8 @@ export interface TaskRowVm {
   expanded: boolean;
   details: DetailVm[];
   actions: ActionVm[];
+  /** Non-null while this row is in edit mode; the details grid is replaced by the form. */
+  editPanel: EditPanelVm | null;
   onToggle: () => void;
   onKeyActivate: KeyboardEventHandler<HTMLDivElement>;
 }

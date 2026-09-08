@@ -31,6 +31,8 @@ interface TaskState {
   updatingIds: readonly string[];
   creating: boolean;
   createErrors: readonly string[];
+  editingTaskId: string | null;
+  editErrors: readonly string[];
 }
 
 const DEFAULT_QUERY: TaskQuery = { page: 1, limit: 20, sortBy: 'createdAt', sortOrder: 'desc' };
@@ -55,6 +57,8 @@ const initialState: TaskState = {
   updatingIds: [],
   creating: false,
   createErrors: [],
+  editingTaskId: null,
+  editErrors: [],
 };
 
 let state: TaskState = initialState;
@@ -152,6 +156,8 @@ function applyQuery(patch: Partial<TaskQuery>): void {
     query: { ...state.query, ...patch },
     expandedTaskId: null,
     selectedTask: null,
+    editingTaskId: null,
+    editErrors: [],
   });
   void getAllTasks();
 }
@@ -172,13 +178,25 @@ function goToPage(page: number): void {
 
 async function toggleAccordion(id: string): Promise<void> {
   if (state.expandedTaskId === id) {
-    patchState({ expandedTaskId: null, selectedTask: null, selectedLoading: false });
+    patchState({
+      expandedTaskId: null,
+      selectedTask: null,
+      selectedLoading: false,
+      editingTaskId: null,
+      editErrors: [],
+    });
     return;
   }
 
   const generation = selectedGuard.next();
   const fromList = state.entities.find((task) => task.id === id) ?? null;
-  patchState({ expandedTaskId: id, selectedTask: fromList, selectedLoading: true });
+  patchState({
+    expandedTaskId: id,
+    selectedTask: fromList,
+    selectedLoading: true,
+    editingTaskId: null,
+    editErrors: [],
+  });
 
   try {
     const task = await taskService.getTaskById(id);
@@ -210,7 +228,8 @@ async function createTask(payload: CreateTaskInput): Promise<Task | null> {
 
 async function updateTask(id: string, payload: UpdateTaskInput): Promise<Task | null> {
   if (state.updatingIds.includes(id)) return null;
-  patchState({ updatingIds: [...state.updatingIds, id], serverError: null });
+  const editing = state.editingTaskId === id;
+  patchState({ updatingIds: [...state.updatingIds, id], serverError: null, editErrors: [] });
 
   try {
     const updated = await taskService.updateTask(id, payload);
@@ -218,15 +237,34 @@ async function updateTask(id: string, payload: UpdateTaskInput): Promise<Task | 
       entities: state.entities.map((task) => (task.id === id ? updated : task)),
       selectedTask: state.selectedTask?.id === id ? updated : state.selectedTask,
       updatingIds: withoutId(state.updatingIds, id),
+      editingTaskId: editing ? null : state.editingTaskId,
       operationSuccess: true,
     });
     void getTaskStats();
     return updated;
   } catch (err) {
+    const messages =
+      err instanceof HttpErrorResponse ? err.messages : ['Could not update the task.'];
     updateServerError(err);
-    patchState({ updatingIds: withoutId(state.updatingIds, id) });
+    patchState({
+      updatingIds: withoutId(state.updatingIds, id),
+      editErrors: editing ? messages : state.editErrors,
+    });
     return null;
   }
+}
+
+function startEditing(id: string): void {
+  patchState({ editingTaskId: id, editErrors: [] });
+}
+
+function cancelEditing(): void {
+  if (state.editingTaskId === null && state.editErrors.length === 0) return;
+  patchState({ editingTaskId: null, editErrors: [] });
+}
+
+function clearEditErrors(): void {
+  if (state.editErrors.length > 0) patchState({ editErrors: [] });
 }
 
 function clearCreateErrors(): void {
@@ -243,6 +281,9 @@ export const taskStoreMethods = {
   toggleAccordion,
   createTask,
   updateTask,
+  startEditing,
+  cancelEditing,
+  clearEditErrors,
   clearCreateErrors,
 } as const;
 
