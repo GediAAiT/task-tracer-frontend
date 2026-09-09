@@ -1,10 +1,18 @@
 @use 'mixins' as *;
 
-.create-panel {
-  @include surface;
-  @apply mb-6 p-4 sm:mb-8 sm:p-6;
+.new-task-btn {
+  @include button;
+  @apply w-full rounded-xl bg-blue-600 px-5 py-3 text-[0.9rem] text-white sm:w-auto sm:px-6;
 
-  .panel-heading {
-    @apply m-0 mb-4 text-[1rem] font-semibold text-gray-900 sm:text-[1.05rem];
+  &:hover {
+    @apply bg-blue-700;
   }
+}
+
+.dialog-content.create-dialog {
+  @apply max-h-[calc(100dvh-3rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-2xl;
+}
+
+.create-dialog-body {
+  @apply min-h-0 overflow-y-auto;
 }

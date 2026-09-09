@@ -1,3 +1,6 @@
 import type { TaskFormPanelVm } from './task-form.vm';
 
-export type EditPanelVm = TaskFormPanelVm;
+export interface EditPanelVm extends TaskFormPanelVm {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}

@@ -5,6 +5,8 @@ export type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectEle
 export interface FieldVm {
   value: string;
   onChange: ChangeEventHandler<FormControl>;
+  /** Set once the field failed validation, so the reason sits next to the control. */
+  error?: string | null;
 }
 
 export interface OptionVm {

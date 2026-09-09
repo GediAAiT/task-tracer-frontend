@@ -25,7 +25,7 @@ interface TaskState {
   listCache: CacheDiagnostics | null;
   stats: TaskStats | null;
   query: TaskQuery;
-  expandedTaskId: string | null;
+  detailTaskId: string | null;
   selectedTask: Task | null;
   selectedLoading: boolean;
   updatingIds: readonly string[];
@@ -33,6 +33,8 @@ interface TaskState {
   createErrors: readonly string[];
   editingTaskId: string | null;
   editErrors: readonly string[];
+  deletingIds: readonly string[];
+  deleteErrors: readonly string[];
 }
 
 const DEFAULT_QUERY: TaskQuery = { page: 1, limit: 20, sortBy: 'createdAt', sortOrder: 'desc' };
@@ -51,7 +53,7 @@ const initialState: TaskState = {
   listCache: null,
   stats: null,
   query: DEFAULT_QUERY,
-  expandedTaskId: null,
+  detailTaskId: null,
   selectedTask: null,
   selectedLoading: false,
   updatingIds: [],
@@ -59,6 +61,8 @@ const initialState: TaskState = {
   createErrors: [],
   editingTaskId: null,
   editErrors: [],
+  deletingIds: [],
+  deleteErrors: [],
 };
 
 let state: TaskState = initialState;
@@ -154,7 +158,7 @@ async function refresh(): Promise<void> {
 function applyQuery(patch: Partial<TaskQuery>): void {
   patchState({
     query: { ...state.query, ...patch },
-    expandedTaskId: null,
+    detailTaskId: null,
     selectedTask: null,
     editingTaskId: null,
     editErrors: [],
@@ -176,22 +180,18 @@ function goToPage(page: number): void {
   applyQuery({ page });
 }
 
-async function toggleAccordion(id: string): Promise<void> {
-  if (state.expandedTaskId === id) {
-    patchState({
-      expandedTaskId: null,
-      selectedTask: null,
-      selectedLoading: false,
-      editingTaskId: null,
-      editErrors: [],
-    });
-    return;
-  }
+function closeTask(): void {
+  if (state.detailTaskId === null) return;
+  selectedGuard.next();
+  patchState({ detailTaskId: null, selectedTask: null, selectedLoading: false });
+}
 
+/** Opens the task detail dialog, refreshing the task from the API behind it. */
+async function openTask(id: string): Promise<void> {
   const generation = selectedGuard.next();
   const fromList = state.entities.find((task) => task.id === id) ?? null;
   patchState({
-    expandedTaskId: id,
+    detailTaskId: id,
     selectedTask: fromList,
     selectedLoading: true,
     editingTaskId: null,
@@ -254,8 +254,43 @@ async function updateTask(id: string, payload: UpdateTaskInput): Promise<Task | 
   }
 }
 
+async function deleteTask(id: string): Promise<boolean> {
+  if (state.deletingIds.includes(id)) return false;
+  patchState({ deletingIds: [...state.deletingIds, id], serverError: null, deleteErrors: [] });
+
+  try {
+    await taskService.deleteTask(id);
+    const wasEditing = state.editingTaskId === id;
+    patchState({
+      entities: state.entities.filter((task) => task.id !== id),
+      deletingIds: withoutId(state.deletingIds, id),
+      deleteErrors: [],
+      detailTaskId: state.detailTaskId === id ? null : state.detailTaskId,
+      selectedTask: state.selectedTask?.id === id ? null : state.selectedTask,
+      editingTaskId: wasEditing ? null : state.editingTaskId,
+      editErrors: wasEditing ? [] : state.editErrors,
+      operationSuccess: true,
+    });
+
+    await refresh();
+
+    // Removing the last row of a page would otherwise leave the list stranded on an empty page.
+    const page = state.meta?.page ?? 1;
+    if (state.entities.length === 0 && page > 1) applyQuery({ page: page - 1 });
+
+    return true;
+  } catch (err) {
+    const deleteErrors =
+      err instanceof HttpErrorResponse ? err.messages : ['Could not delete the task.'];
+    updateServerError(err);
+    patchState({ deletingIds: withoutId(state.deletingIds, id), deleteErrors });
+    return false;
+  }
+}
+
+/** The edit form replaces the detail dialog so the two never stack. */
 function startEditing(id: string): void {
-  patchState({ editingTaskId: id, editErrors: [] });
+  patchState({ editingTaskId: id, editErrors: [], detailTaskId: null, selectedLoading: false });
 }
 
 function cancelEditing(): void {
@@ -265,6 +300,10 @@ function cancelEditing(): void {
 
 function clearEditErrors(): void {
   if (state.editErrors.length > 0) patchState({ editErrors: [] });
+}
+
+function clearDeleteErrors(): void {
+  if (state.deleteErrors.length > 0) patchState({ deleteErrors: [] });
 }
 
 function clearCreateErrors(): void {
@@ -278,12 +317,15 @@ export const taskStoreMethods = {
   setTab,
   setSearch,
   goToPage,
-  toggleAccordion,
+  openTask,
+  closeTask,
   createTask,
   updateTask,
+  deleteTask,
   startEditing,
   cancelEditing,
   clearEditErrors,
+  clearDeleteErrors,
   clearCreateErrors,
 } as const;
 

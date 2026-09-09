@@ -3,6 +3,8 @@ import { EmptyIcon } from './icons.html';
 import { TaskRowSection } from './task-row.html';
 
 export function TaskListSection({ list }: { list: TaskListVm }) {
+  if (!list.visible) return null;
+
   return (
     <div className={list.loading ? 'tasks-list is-loading' : 'tasks-list'}>
       {list.showSkeleton && (
