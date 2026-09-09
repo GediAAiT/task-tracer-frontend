@@ -1,0 +1,105 @@
+@use 'mixins' as *;
+
+.tasks-table {
+  @include surface;
+  @apply overflow-hidden px-2 pt-2 pb-4 sm:px-4 sm:pt-4;
+
+  .ui-table-head {
+    @apply text-[0.75rem] font-semibold tracking-wide text-gray-500 uppercase;
+  }
+
+  .ui-table-row:hover {
+    @apply bg-gray-50;
+  }
+
+  .ui-table-row.clickable {
+    @apply cursor-pointer;
+  }
+
+  .ui-table-cell {
+    @apply py-3 text-gray-600;
+  }
+
+  .task-column {
+    @apply w-full min-w-60;
+  }
+
+  .task-cell {
+    @apply whitespace-normal;
+  }
+
+  .task-brief {
+    @apply flex min-w-0 flex-col items-start gap-1;
+
+    .task-headline {
+      @apply flex flex-wrap items-center gap-2;
+    }
+
+    .task-link {
+      @include button;
+      @apply bg-transparent p-0 text-left text-[0.95rem] font-semibold text-gray-900 underline-offset-4;
+
+      &:hover {
+        @apply text-blue-600 underline;
+      }
+
+      &:focus-visible {
+        @apply rounded-sm outline-2 outline-offset-2 outline-blue-500;
+      }
+
+      &.is-done {
+        @apply text-gray-400 line-through;
+      }
+    }
+
+    .overdue-badge {
+      @include badge;
+      @apply bg-red-600 text-white;
+    }
+
+    .task-summary {
+      @apply line-clamp-1 text-[0.8rem] text-gray-500;
+    }
+  }
+
+  .severity-badge {
+    @include badge;
+
+    @each $name, $tone in (
+      (low, 'bg-gray-100 text-gray-600'),
+      (medium, 'bg-yellow-50 text-yellow-600'),
+      (high, 'bg-red-50 text-red-600')
+    ) {
+      &.#{$name} {
+        @apply #{$tone};
+      }
+    }
+  }
+
+  .status-indicator {
+    @apply flex items-center gap-[0.35rem] text-[0.8rem] font-medium;
+
+    @each $name, $tone in (
+      (todo, 'text-gray-600'),
+      (in_progress, 'text-blue-600'),
+      (blocked, 'text-red-600'),
+      (done, 'text-green-600')
+    ) {
+      &.#{$name} {
+        @apply #{$tone};
+      }
+    }
+  }
+
+  .assignee {
+    @apply flex items-center gap-[0.35rem] text-[0.85rem];
+  }
+
+  .created-column {
+    @apply hidden text-[0.8rem] sm:table-cell;
+  }
+
+  .ui-table-caption {
+    @apply mt-3 text-[0.8rem] text-gray-400;
+  }
+}

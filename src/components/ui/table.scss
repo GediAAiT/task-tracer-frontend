@@ -1,0 +1,50 @@
+@reference '../../app/globals.css';
+
+.ui-table-container {
+  @apply relative w-full overflow-x-auto;
+}
+
+.ui-table {
+  @apply w-full caption-bottom text-sm;
+}
+
+.ui-table-header {
+  tr {
+    @apply border-b;
+  }
+}
+
+.ui-table-body {
+  tr:last-child {
+    @apply border-0;
+  }
+}
+
+.ui-table-footer {
+  @apply border-t bg-muted/50 font-medium;
+
+  tr:last-child {
+    @apply border-b-0;
+  }
+}
+
+.ui-table-row {
+  @apply border-b transition-colors;
+
+  &:hover,
+  &[data-state='selected'] {
+    @apply bg-muted/50;
+  }
+}
+
+.ui-table-head {
+  @apply h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground;
+}
+
+.ui-table-cell {
+  @apply p-2 align-middle whitespace-nowrap;
+}
+
+.ui-table-caption {
+  @apply mt-4 text-sm text-muted-foreground;
+}

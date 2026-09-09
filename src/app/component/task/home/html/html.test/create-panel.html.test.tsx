@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EMPTY_TASK_FORM } from '@/app/model/task/task';
 import type { CreatePanelVm } from '@/app/model/task/view/create-panel.vm';
 import { CreatePanelSection } from '../create-panel.html';
 
@@ -63,6 +64,21 @@ describe('CreatePanelSection', () => {
       screen.getByText('Fill in the details below. Title, status and priority are required.'),
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue('Renew the library cards')).toBeInTheDocument();
+  });
+
+  it('opens a new task on To do and Medium', () => {
+    render(
+      <CreatePanelSection
+        panel={panel({
+          title: field(''),
+          status: field(EMPTY_TASK_FORM.status),
+          priority: field(EMPTY_TASK_FORM.priority),
+        })}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', { name: /status/i })).toHaveValue('TODO');
+    expect(screen.getByRole('combobox', { name: /priority/i })).toHaveValue('MEDIUM');
   });
 
   it('submits the form from the dialog footer', async () => {

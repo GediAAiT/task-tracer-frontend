@@ -181,9 +181,15 @@ function goToPage(page: number): void {
 }
 
 function closeTask(): void {
-  if (state.detailTaskId === null) return;
+  if (state.detailTaskId === null && state.editingTaskId === null) return;
   selectedGuard.next();
-  patchState({ detailTaskId: null, selectedTask: null, selectedLoading: false });
+  patchState({
+    detailTaskId: null,
+    editingTaskId: null,
+    editErrors: [],
+    selectedTask: null,
+    selectedLoading: false,
+  });
 }
 
 async function openTask(id: string): Promise<void> {
@@ -191,10 +197,10 @@ async function openTask(id: string): Promise<void> {
   const fromList = state.entities.find((task) => task.id === id) ?? null;
   patchState({
     detailTaskId: id,
+    editingTaskId: id,
+    editErrors: [],
     selectedTask: fromList,
     selectedLoading: true,
-    editingTaskId: null,
-    editErrors: [],
   });
 
   try {
@@ -237,6 +243,8 @@ async function updateTask(id: string, payload: UpdateTaskInput): Promise<Task | 
       selectedTask: state.selectedTask?.id === id ? updated : state.selectedTask,
       updatingIds: withoutId(state.updatingIds, id),
       editingTaskId: editing ? null : state.editingTaskId,
+      detailTaskId: editing ? null : state.detailTaskId,
+      selectedLoading: editing ? false : state.selectedLoading,
       operationSuccess: true,
     });
     void getTaskStats();
@@ -287,15 +295,6 @@ async function deleteTask(id: string): Promise<boolean> {
   }
 }
 
-function startEditing(id: string): void {
-  patchState({ editingTaskId: id, editErrors: [], detailTaskId: null, selectedLoading: false });
-}
-
-function cancelEditing(): void {
-  if (state.editingTaskId === null && state.editErrors.length === 0) return;
-  patchState({ editingTaskId: null, editErrors: [] });
-}
-
 function clearEditErrors(): void {
   if (state.editErrors.length > 0) patchState({ editErrors: [] });
 }
@@ -320,8 +319,6 @@ export const taskStoreMethods = {
   createTask,
   updateTask,
   deleteTask,
-  startEditing,
-  cancelEditing,
   clearEditErrors,
   clearDeleteErrors,
   clearCreateErrors,

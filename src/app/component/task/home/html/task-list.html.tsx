@@ -1,6 +1,7 @@
 import type { TaskListVm } from '@/app/model/task/view/task-list.vm';
 import { EmptyIcon } from './icons.html';
 import { TaskRowSection } from './task-row.html';
+import { TaskTableSection } from './task-table.html';
 
 export function TaskListSection({ list }: { list: TaskListVm }) {
   if (!list.visible) return null;
@@ -15,9 +16,12 @@ export function TaskListSection({ list }: { list: TaskListVm }) {
         </>
       )}
 
-      {list.rows.map((row) => (
-        <TaskRowSection key={row.id} row={row} />
-      ))}
+      {list.rows.length > 0 && list.layout === 'table' && (
+        <TaskTableSection rows={list.rows} caption={list.caption} />
+      )}
+
+      {list.layout === 'cards' &&
+        list.rows.map((row) => <TaskRowSection key={row.id} row={row} />)}
 
       {list.rows.length === 0 && !list.showSkeleton && (
         <div className="empty-state">

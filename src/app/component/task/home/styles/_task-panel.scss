@@ -1,13 +1,13 @@
 @use 'mixins' as *;
 
-.dialog-content.detail-dialog {
+.dialog-content.task-dialog {
   @apply max-h-[calc(100dvh-3rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-2xl;
 
   .dialog-footer {
     @apply sm:flex-wrap sm:justify-start;
   }
 
-  .detail-heading {
+  .task-heading {
     @apply flex items-start gap-3 pr-8 sm:gap-4;
 
     .icon-container {
@@ -25,7 +25,7 @@
       }
     }
 
-    .detail-headline {
+    .task-headline {
       @apply flex min-w-0 flex-1 flex-col gap-2;
 
       .dialog-title {
@@ -36,7 +36,7 @@
         }
       }
 
-      .detail-badges {
+      .task-badges {
         @apply flex flex-wrap items-center gap-2;
 
         .severity-badge {
@@ -77,34 +77,26 @@
   }
 }
 
-.detail-dialog-body {
+.task-dialog-body {
   @apply min-h-0 overflow-y-auto;
 
-  .tag-row {
-    @apply mb-4 flex flex-wrap gap-[0.35rem];
-
-    .tag-chip {
-      @include badge;
-      @apply bg-gray-100 text-gray-600;
-    }
-  }
-
   .details-heading {
-    @apply m-0 mb-4 text-[0.85rem] font-bold tracking-wide text-gray-600;
+    @apply m-0 mt-6 mb-3 border-t border-gray-100 pt-5;
+    @apply text-[0.85rem] font-bold tracking-wide text-gray-600;
   }
 
   .details-grid {
-    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4;
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4;
 
     .detail-box {
-      @apply min-w-0 rounded-xl bg-gray-50 px-4 py-3 sm:px-5 sm:py-4;
+      @apply min-w-0 rounded-xl bg-gray-50 px-4 py-3;
 
       .detail-label {
-        @apply mb-[0.4rem] block text-[0.75rem] font-semibold tracking-wide text-gray-500 uppercase;
+        @apply mb-[0.4rem] block text-[0.7rem] font-semibold tracking-wide text-gray-500 uppercase;
       }
 
       .value {
-        @apply text-[0.95rem] font-medium wrap-break-word text-gray-900 sm:text-base;
+        @apply text-[0.85rem] font-medium wrap-break-word text-gray-900;
       }
     }
   }

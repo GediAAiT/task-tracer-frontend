@@ -1,4 +1,4 @@
-import type { DetailPanelVm } from '@/app/model/task/view/detail-panel.vm';
+import type { TaskPanelVm } from '@/app/model/task/view/task-panel.vm';
 import {
   Dialog,
   DialogContent,
@@ -8,23 +8,26 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { RowIcon, StatusIcon } from './icons.html';
+import { TaskFormErrors, TaskFormFields } from './task-form.html';
 
-export function DetailPanelSection({ panel }: { panel: DetailPanelVm }) {
+const TASK_FORM_ID = 'task-panel-form';
+
+export function TaskPanelSection({ panel }: { panel: TaskPanelVm }) {
   return (
     <Dialog open={panel.open} onOpenChange={panel.onOpenChange}>
-      <DialogContent className="detail-dialog">
+      <DialogContent className="task-dialog">
         <DialogHeader>
-          <div className="detail-heading">
+          <div className="task-heading">
             <div className={`icon-container ${panel.icon}`}>
               <RowIcon name={panel.icon} />
             </div>
 
-            <div className="detail-headline">
+            <div className="task-headline">
               <DialogTitle className={panel.isDone ? 'is-done' : undefined}>
-                {panel.title}
+                {panel.heading}
               </DialogTitle>
 
-              <div className="detail-badges">
+              <div className="task-badges">
                 <span className={`severity-badge ${panel.severity}`}>{panel.severityLabel}</span>
                 <span className={`status-indicator ${panel.statusModifier}`}>
                   <StatusIcon name={panel.statusIcon} />
@@ -35,30 +38,31 @@ export function DetailPanelSection({ panel }: { panel: DetailPanelVm }) {
             </div>
           </div>
 
-          <DialogDescription>{panel.description}</DialogDescription>
+          <DialogDescription>
+            Change any field and save, or pick one of the actions below.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="detail-dialog-body">
-          {panel.tags.length > 0 && (
-            <div className="tag-row">
-              {panel.tags.map((tag) => (
-                <span key={tag} className="tag-chip">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
+        <div className="task-dialog-body">
+          <form id={TASK_FORM_ID} onSubmit={panel.onSubmit}>
+            <TaskFormFields form={panel} />
+            <TaskFormErrors errors={panel.errors} />
+          </form>
 
-          <h4 className="details-heading">TASK DETAILS</h4>
+          {panel.details.length > 0 && (
+            <>
+              <h4 className="details-heading">TASK HISTORY</h4>
 
-          <div className="details-grid">
-            {panel.details.map((detail) => (
-              <div key={detail.key} className="detail-box">
-                <span className="detail-label">{detail.label}</span>
-                <div className="value">{detail.value}</div>
+              <div className="details-grid">
+                {panel.details.map((detail) => (
+                  <div key={detail.key} className="detail-box">
+                    <span className="detail-label">{detail.label}</span>
+                    <div className="value">{detail.value}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
 
           {panel.loading && (
             <p className="detail-loading" role="status">
@@ -68,6 +72,15 @@ export function DetailPanelSection({ panel }: { panel: DetailPanelVm }) {
         </div>
 
         <DialogFooter>
+          <button
+            type="submit"
+            form={TASK_FORM_ID}
+            className="action-btn primary-btn"
+            disabled={panel.submitDisabled}
+          >
+            {panel.submitLabel}
+          </button>
+
           {panel.actions.map((action) => (
             <button
               key={action.key}
