@@ -1,23 +1,9 @@
 import type { KeyboardEventHandler } from 'react';
+import type { DeletePanelVm } from './delete-panel.vm';
+import type { DetailPanelVm, RowIconName, StatusIconName } from './detail-panel.vm';
 import type { EditPanelVm } from './edit-panel.vm';
 
-export type RowIconName = 'user' | 'card' | 'settings' | 'dollar';
-
-export type StatusIconName = 'check' | 'cross' | 'clock';
-
-export interface DetailVm {
-  key: string;
-  label: string;
-  value: string;
-}
-
-export interface ActionVm {
-  key: string;
-  label: string;
-  modifier: string;
-  disabled: boolean;
-  onSelect: () => void;
-}
+export type { ActionVm, DetailVm, RowIconName, StatusIconName } from './detail-panel.vm';
 
 export interface TaskRowVm {
   id: string;
@@ -34,10 +20,9 @@ export interface TaskRowVm {
   overdue: boolean;
   isDone: boolean;
   tags: string[];
-  expanded: boolean;
-  details: DetailVm[];
-  actions: ActionVm[];
+  detailPanel: DetailPanelVm | null;
   editPanel: EditPanelVm | null;
-  onToggle: () => void;
+  deletePanel: DeletePanelVm | null;
+  onOpen: () => void;
   onKeyActivate: KeyboardEventHandler<HTMLDivElement>;
 }

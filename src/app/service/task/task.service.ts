@@ -45,6 +45,10 @@ export class TaskService {
   updateTask(id: string, payload: UpdateTaskInput, signal?: AbortSignal): Promise<Task> {
     return httpClient.patch<Task>(taskPath(id), payload, { signal });
   }
+
+  deleteTask(id: string, signal?: AbortSignal): Promise<void> {
+    return httpClient.delete<void>(taskPath(id), { signal });
+  }
 }
 
 export const taskService = new TaskService();

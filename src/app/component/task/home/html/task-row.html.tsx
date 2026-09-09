@@ -1,16 +1,18 @@
 import type { TaskRowVm } from '@/app/model/task/view/task-row.vm';
+import { DeletePanelSection } from './delete-panel.html';
+import { DetailPanelSection } from './detail-panel.html';
 import { EditPanelSection } from './edit-panel.html';
-import { ChevronDownIcon, PersonIcon, RowIcon, StatusIcon } from './icons.html';
+import { PersonIcon, RowIcon, StatusIcon } from './icons.html';
 
 export function TaskRowSection({ row }: { row: TaskRowVm }) {
   return (
-    <div className={row.expanded ? 'task-accordion expanded' : 'task-accordion'}>
+    <div className="task-card">
       <div
-        className="accordion-header"
+        className="card-header"
         role="button"
         tabIndex={0}
-        aria-expanded={row.expanded}
-        onClick={row.onToggle}
+        aria-haspopup="dialog"
+        onClick={row.onOpen}
         onKeyDown={row.onKeyActivate}
       >
         <div className="header-content">
@@ -52,47 +54,12 @@ export function TaskRowSection({ row }: { row: TaskRowVm }) {
           </div>
         </div>
 
-        <div className="expand-icon">
-          <ChevronDownIcon />
-        </div>
+        <span className="open-hint">View details</span>
       </div>
 
-      <div className={row.expanded ? 'accordion-body show' : 'accordion-body'}>
-        <div className="body-content">
-          {row.editPanel ? (
-            <EditPanelSection panel={row.editPanel} />
-          ) : (
-            <>
-              <h4 className="details-heading">TASK DETAILS</h4>
-
-              <div className="details-grid">
-                {row.details.map((detail) => (
-                  <div key={detail.key} className="detail-box">
-                    <span className="detail-label">{detail.label}</span>
-                    <div className="value">{detail.value}</div>
-                  </div>
-                ))}
-              </div>
-
-              {row.actions.length > 0 && (
-                <div className="actions-container">
-                  {row.actions.map((action) => (
-                    <button
-                      key={action.key}
-                      type="button"
-                      className={`action-btn ${action.modifier}`}
-                      disabled={action.disabled}
-                      onClick={action.onSelect}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+      {row.detailPanel && <DetailPanelSection panel={row.detailPanel} />}
+      {row.editPanel && <EditPanelSection panel={row.editPanel} />}
+      {row.deletePanel && <DeletePanelSection panel={row.deletePanel} />}
     </div>
   );
 }

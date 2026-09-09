@@ -1,0 +1,115 @@
+@use 'mixins' as *;
+
+.dialog-content.detail-dialog {
+  @apply max-h-[calc(100dvh-3rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-2xl;
+
+  .dialog-footer {
+    @apply sm:flex-wrap sm:justify-start;
+  }
+
+  .detail-heading {
+    @apply flex items-start gap-3 pr-8 sm:gap-4;
+
+    .icon-container {
+      @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11;
+
+      @each $name, $tone in (
+        (user, 'bg-blue-50 text-blue-500'),
+        (card, 'bg-orange-50 text-orange-600'),
+        (settings, 'bg-violet-50 text-violet-500'),
+        (dollar, 'bg-green-50 text-green-600')
+      ) {
+        &.#{$name} {
+          @apply #{$tone};
+        }
+      }
+    }
+
+    .detail-headline {
+      @apply flex min-w-0 flex-1 flex-col gap-2;
+
+      .dialog-title {
+        @apply text-[1.05rem] wrap-break-word text-gray-900;
+
+        &.is-done {
+          @apply text-gray-400 line-through;
+        }
+      }
+
+      .detail-badges {
+        @apply flex flex-wrap items-center gap-2;
+
+        .severity-badge {
+          @include badge;
+
+          @each $name, $tone in (
+            (low, 'bg-gray-100 text-gray-600'),
+            (medium, 'bg-yellow-50 text-yellow-600'),
+            (high, 'bg-red-50 text-red-600')
+          ) {
+            &.#{$name} {
+              @apply #{$tone};
+            }
+          }
+        }
+
+        .overdue-badge {
+          @include badge;
+          @apply bg-red-600 text-white;
+        }
+
+        .status-indicator {
+          @apply flex items-center gap-[0.35rem] text-[0.8rem] font-medium;
+
+          @each $name, $tone in (
+            (todo, 'text-gray-600'),
+            (in_progress, 'text-blue-600'),
+            (blocked, 'text-red-600'),
+            (done, 'text-green-600')
+          ) {
+            &.#{$name} {
+              @apply #{$tone};
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.detail-dialog-body {
+  @apply min-h-0 overflow-y-auto;
+
+  .tag-row {
+    @apply mb-4 flex flex-wrap gap-[0.35rem];
+
+    .tag-chip {
+      @include badge;
+      @apply bg-gray-100 text-gray-600;
+    }
+  }
+
+  .details-heading {
+    @apply m-0 mb-4 text-[0.85rem] font-bold tracking-wide text-gray-600;
+  }
+
+  .details-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4;
+
+    .detail-box {
+      @apply min-w-0 rounded-xl bg-gray-50 px-4 py-3 sm:px-5 sm:py-4;
+
+      .detail-label {
+        @apply mb-[0.4rem] block text-[0.75rem] font-semibold tracking-wide text-gray-500 uppercase;
+      }
+
+      .value {
+        @apply text-[0.95rem] font-medium wrap-break-word text-gray-900 sm:text-base;
+      }
+    }
+  }
+
+  .detail-loading {
+    @apply mt-4 mb-0 text-[0.8rem] text-gray-400;
+  }
+}

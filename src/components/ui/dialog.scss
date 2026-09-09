@@ -1,0 +1,51 @@
+@reference '../../app/globals.css';
+
+.dialog-overlay {
+  @apply fixed inset-0 isolate z-50 bg-black/10;
+  @apply supports-backdrop-filter:backdrop-blur-xs;
+  @apply duration-100 data-open:animate-in data-open:fade-in-0;
+  @apply data-closed:animate-out data-closed:fade-out-0;
+}
+
+.dialog-content {
+  @apply fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2;
+  @apply grid w-full max-w-[calc(100%-2rem)] gap-4 sm:max-w-sm;
+  @apply rounded-xl bg-popover p-4 text-sm text-popover-foreground;
+  @apply ring-1 ring-foreground/10 outline-none;
+  @apply duration-100 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95;
+  @apply data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95;
+}
+
+.dialog-close {
+  @apply absolute top-2 right-2 inline-flex size-7 items-center justify-center;
+  @apply cursor-pointer rounded-md text-muted-foreground transition-colors outline-none;
+
+  &:hover {
+    @apply bg-muted text-foreground;
+  }
+
+  &:focus-visible {
+    @apply ring-2 ring-ring/50;
+  }
+
+  svg {
+    @apply size-4;
+  }
+}
+
+.dialog-header {
+  @apply flex flex-col gap-2;
+}
+
+.dialog-title {
+  @apply font-heading text-base leading-none font-medium;
+}
+
+.dialog-description {
+  @apply text-sm text-muted-foreground;
+}
+
+.dialog-footer {
+  @apply -mx-4 -mb-4 flex flex-col-reverse gap-2 p-4;
+  @apply rounded-b-xl border-t bg-muted/50 sm:flex-row sm:justify-end;
+}

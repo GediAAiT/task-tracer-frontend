@@ -99,12 +99,16 @@ export interface ErrorResponse {
 export interface TaskFormValues {
   title: string;
   description: string;
-  status: TaskStatus;
-  priority: TaskPriority;
+  status: TaskStatus | '';
+  priority: TaskPriority | '';
   dueDate: string;
   assignee: string;
   tags: string;
 }
+
+export type TaskFormField = keyof TaskFormValues;
+
+export type TaskFieldErrors = Partial<Record<TaskFormField, string>>;
 
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   TODO: 'To do',
@@ -142,6 +146,32 @@ export const EMPTY_TASK_FORM: TaskFormValues = {
   tags: '',
 };
 
+export const TASK_FORM_FIELDS: readonly TaskFormField[] = [
+  'title',
+  'description',
+  'status',
+  'priority',
+  'dueDate',
+  'assignee',
+  'tags',
+];
+
+export const TASK_FORM_FIELD_LABELS: Record<TaskFormField, string> = {
+  title: 'Title',
+  description: 'Description',
+  status: 'Status',
+  priority: 'Priority',
+  dueDate: 'Due date',
+  assignee: 'Assignee',
+  tags: 'Tags',
+};
+
+export const TITLE_MAX_LENGTH = 200;
+export const DESCRIPTION_MAX_LENGTH = 2000;
+export const ASSIGNEE_MAX_LENGTH = 120;
+export const TAGS_MAX_COUNT = 20;
+export const TAG_MAX_LENGTH = 40;
+
 export function isOverdue(task: Task, now: Date = new Date()): boolean {
   if (task.status === 'DONE' || task.dueDate === null) return false;
   return new Date(task.dueDate).getTime() < now.getTime();
@@ -175,12 +205,60 @@ function toDateTimeLocal(iso: string | null): string {
   );
 }
 
+export function validateTaskForm(values: TaskFormValues): TaskFieldErrors {
+  const errors: TaskFieldErrors = {};
+
+  const title = values.title.trim();
+  if (!title) errors.title = 'Title is required.';
+  else if (title.length > TITLE_MAX_LENGTH)
+    errors.title = `Title must be ${TITLE_MAX_LENGTH} characters or fewer.`;
+
+  if (values.description.trim().length > DESCRIPTION_MAX_LENGTH)
+    errors.description = `Description must be ${DESCRIPTION_MAX_LENGTH} characters or fewer.`;
+
+  if (!values.status) errors.status = 'Status is required. Pick where this task stands.';
+  else if (!TASK_STATUSES.includes(values.status)) errors.status = 'Pick a status from the list.';
+
+  if (!values.priority) errors.priority = 'Priority is required. Pick how urgent this task is.';
+  else if (!TASK_PRIORITIES.includes(values.priority))
+    errors.priority = 'Pick a priority from the list.';
+
+  if (values.dueDate && Number.isNaN(new Date(values.dueDate).getTime()))
+    errors.dueDate = 'Due date is not a valid date and time.';
+
+  if (values.assignee.trim().length > ASSIGNEE_MAX_LENGTH)
+    errors.assignee = `Assignee must be ${ASSIGNEE_MAX_LENGTH} characters or fewer.`;
+
+  const tags = parseTags(values.tags);
+  if (tags.length > TAGS_MAX_COUNT) errors.tags = `Use at most ${TAGS_MAX_COUNT} tags.`;
+  else if (tags.some((tag) => tag.length > TAG_MAX_LENGTH))
+    errors.tags = `Each tag must be ${TAG_MAX_LENGTH} characters or fewer.`;
+
+  return errors;
+}
+
+export function hasFieldErrors(errors: TaskFieldErrors): boolean {
+  return TASK_FORM_FIELDS.some((field) => errors[field] !== undefined);
+}
+
+export function listFieldErrors(errors: TaskFieldErrors): string[] {
+  return TASK_FORM_FIELDS.map((field) => errors[field]).filter(
+    (message): message is string => message !== undefined,
+  );
+}
+
+export function clearFieldError(errors: TaskFieldErrors, field: TaskFormField): TaskFieldErrors {
+  if (errors[field] === undefined) return errors;
+  const next = { ...errors };
+  delete next[field];
+  return next;
+}
+
 export function toTaskInput(values: TaskFormValues): CreateTaskInput {
-  const input: CreateTaskInput = {
-    title: values.title.trim(),
-    status: values.status,
-    priority: values.priority,
-  };
+  const input: CreateTaskInput = { title: values.title.trim() };
+
+  if (values.status) input.status = values.status;
+  if (values.priority) input.priority = values.priority;
 
   const description = values.description.trim();
   if (description) input.description = description;
@@ -210,13 +288,16 @@ export function toFormValues(task: Task): TaskFormValues {
 }
 
 export function toTaskUpdate(values: TaskFormValues): UpdateTaskInput {
-  return {
+  const update: UpdateTaskInput = {
     title: values.title.trim(),
     description: values.description.trim() || null,
-    status: values.status,
-    priority: values.priority,
     dueDate: parseDueDate(values.dueDate),
     assignee: values.assignee.trim() || null,
     tags: parseTags(values.tags),
   };
+
+  if (values.status) update.status = values.status;
+  if (values.priority) update.priority = values.priority;
+
+  return update;
 }

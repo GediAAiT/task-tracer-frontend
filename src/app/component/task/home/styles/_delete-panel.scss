@@ -1,0 +1,5 @@
+@use 'mixins' as *;
+
+.dialog-content.delete-dialog {
+  @apply sm:max-w-md;
+}

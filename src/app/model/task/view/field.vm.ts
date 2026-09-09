@@ -5,6 +5,7 @@ export type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectEle
 export interface FieldVm {
   value: string;
   onChange: ChangeEventHandler<FormControl>;
+  error?: string | null;
 }
 
 export interface OptionVm {

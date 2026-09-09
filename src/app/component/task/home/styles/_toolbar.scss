@@ -7,13 +7,4 @@
     @include control;
     @apply min-w-0 flex-1 sm:min-w-60;
   }
-
-  .new-task-btn {
-    @include button;
-    @apply w-full rounded-xl bg-blue-600 px-5 py-3 text-[0.9rem] text-white sm:w-auto sm:px-6;
-
-    &:hover {
-      @apply bg-blue-700;
-    }
-  }
 }

@@ -1,4 +1,4 @@
-import type { RowIconName, StatusIconName } from '@/app/model/task/view/task-row.vm';
+import type { RowIconName, StatusIconName } from '@/app/model/task/view/detail-panel.vm';
 
 export function FileIcon() {
   return (
@@ -51,12 +51,6 @@ function ClockIcon() {
 export function PersonIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-  );
-}
-
-export function ChevronDownIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
   );
 }
 

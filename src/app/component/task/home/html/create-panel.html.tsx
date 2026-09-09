@@ -1,25 +1,49 @@
 import type { CreatePanelVm } from '@/app/model/task/view/create-panel.vm';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { TaskFormErrors, TaskFormFields } from './task-form.html';
 
+const CREATE_FORM_ID = 'create-task-form';
+
 export function CreatePanelSection({ panel }: { panel: CreatePanelVm }) {
-  if (!panel.open) return null;
-
   return (
-    <div className="create-panel">
-      <h2 className="panel-heading">New task</h2>
-      <form onSubmit={panel.onSubmit}>
-        <TaskFormFields form={panel} />
-        <TaskFormErrors errors={panel.errors} />
+    <Dialog open={panel.open} onOpenChange={panel.onOpenChange}>
+      <DialogTrigger className="new-task-btn">New task</DialogTrigger>
 
-        <div className="form-actions">
-          <button type="submit" className="action-btn primary-btn" disabled={panel.submitDisabled}>
+      <DialogContent className="create-dialog">
+        <DialogHeader>
+          <DialogTitle>New task</DialogTitle>
+          <DialogDescription>
+            Fill in the details below. Title, status and priority are required.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form id={CREATE_FORM_ID} className="create-dialog-body" onSubmit={panel.onSubmit}>
+          <TaskFormFields form={panel} />
+          <TaskFormErrors errors={panel.errors} />
+        </form>
+
+        <DialogFooter>
+          <button
+            type="submit"
+            form={CREATE_FORM_ID}
+            className="action-btn primary-btn"
+            disabled={panel.submitDisabled}
+          >
             {panel.submitLabel}
           </button>
           <button type="button" className="action-btn neutral-btn" onClick={panel.onCancel}>
             Cancel
           </button>
-        </div>
-      </form>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

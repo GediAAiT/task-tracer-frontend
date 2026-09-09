@@ -19,8 +19,11 @@ export function HomeTemplate(props: HomeVm) {
 
       <StatCardsSection cards={props.statCards} />
       <TabsSection tabs={props.tabs} />
-      <ToolbarSection toolbar={props.toolbar} />
-      <CreatePanelSection panel={props.createPanel} />
+
+      <ToolbarSection toolbar={props.toolbar}>
+        <CreatePanelSection panel={props.createPanel} />
+      </ToolbarSection>
+
       <FeedbackSection feedback={props.feedback} />
       <TaskListSection list={props.list} />
       <PaginationSection pagination={props.pagination} />
