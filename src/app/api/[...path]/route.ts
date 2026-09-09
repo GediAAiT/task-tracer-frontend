@@ -47,7 +47,7 @@ function badGateway(target: string, cause: unknown): Response {
   return Response.json(
     {
       statusCode: 502,
-      message: 'Could not reach the Task Tracer API. Is the backend running?',
+      message: 'The server is not available, please try again.',
       error: 'Bad Gateway',
     },
     { status: 502 },

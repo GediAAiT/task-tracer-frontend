@@ -22,10 +22,7 @@ export class HttpErrorResponse extends Error {
 
 export class NetworkError extends Error {
   constructor(cause: unknown) {
-    const target = environment.apiUrl.startsWith('http')
-      ? `the API at ${environment.apiUrl}`
-      : 'the API';
-    super(`Could not reach ${target}. Is the backend running?`);
+    super('The server is not available, please try again.');
     this.name = 'NetworkError';
     this.cause = cause;
   }
