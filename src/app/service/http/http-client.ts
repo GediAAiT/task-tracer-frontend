@@ -1,3 +1,4 @@
+import { BACKEND_OFFLINE_MESSAGE } from '@/app/model/health/health';
 import type { ErrorResponse } from '@/app/model/task/task';
 import { environment } from '@/environments/environment';
 
@@ -22,10 +23,17 @@ export class HttpErrorResponse extends Error {
 
 export class NetworkError extends Error {
   constructor(cause: unknown) {
-    super('The server is not available, please try again.');
+    super(BACKEND_OFFLINE_MESSAGE);
     this.name = 'NetworkError';
     this.cause = cause;
   }
+}
+
+const UNAVAILABLE_STATUSES = new Set([502, 503, 504]);
+
+export function isBackendUnavailable(error: unknown): boolean {
+  if (error instanceof NetworkError) return true;
+  return error instanceof HttpErrorResponse && UNAVAILABLE_STATUSES.has(error.status);
 }
 
 export type QueryParams = Record<string, string | number | boolean | undefined>;
@@ -118,8 +126,6 @@ async function body<T>(
 
 export const httpClient = {
   get: <T>(path: string, options?: RequestOptions) => body<T>('GET', path, undefined, options),
-  getWithHeaders: <T>(path: string, options?: RequestOptions) =>
-    request<T>('GET', path, undefined, options),
   post: <T>(path: string, payload: unknown, options?: RequestOptions) =>
     body<T>('POST', path, payload, options),
   patch: <T>(path: string, payload: unknown, options?: RequestOptions) =>

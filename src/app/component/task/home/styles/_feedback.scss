@@ -5,12 +5,28 @@
   @apply px-4 py-3 text-[0.85rem] text-red-600;
   @apply sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-4 sm:text-[0.9rem];
 
+  .error-banner-text {
+    @apply flex min-w-0 flex-col gap-1;
+  }
+
+  .reconnect-note {
+    @apply flex items-center gap-2 text-[0.78rem] text-red-500/90 sm:text-[0.8rem];
+  }
+
+  .reconnect-spinner {
+    @apply size-3 shrink-0 animate-spin rounded-full border-2 border-red-300 border-t-red-600;
+  }
+
   .retry-btn {
     @include button;
     @apply shrink-0 rounded-lg bg-red-600 px-4 py-2 text-[0.8rem] text-white;
 
     &:hover {
       @apply bg-red-700;
+    }
+
+    &:disabled {
+      @apply cursor-not-allowed bg-red-300 hover:bg-red-300;
     }
   }
 }

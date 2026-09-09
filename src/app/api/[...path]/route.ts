@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server';
-
-const DEFAULT_API_URL = 'http://localhost:3000';
+import { backendOrigin } from '../backend';
 
 const HOP_BY_HOP = new Set([
   'connection',
@@ -18,10 +17,6 @@ const STRIPPED_RESPONSE_HEADERS = new Set([
   'content-encoding',
   'content-length',
 ]);
-
-function backendOrigin(): string {
-  return (process.env.API_URL ?? DEFAULT_API_URL).replace(/\/$/, '');
-}
 
 function requestHeaders(source: Headers): Headers {
   const headers = new Headers();
