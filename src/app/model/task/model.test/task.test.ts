@@ -31,8 +31,14 @@ describe('validateTaskForm', () => {
     expect(hasFieldErrors(errors)).toBe(false);
   });
 
+  it('starts a new task on To do and Medium so only the title is left to fill in', () => {
+    expect(EMPTY_TASK_FORM.status).toBe('TODO');
+    expect(EMPTY_TASK_FORM.priority).toBe('MEDIUM');
+    expect(validateTaskForm(EMPTY_TASK_FORM)).toEqual({ title: 'Title is required.' });
+  });
+
   it('names every required field the author left empty', () => {
-    const errors = validateTaskForm(EMPTY_TASK_FORM);
+    const errors = validateTaskForm(form({ title: '', status: '', priority: '' }));
 
     expect(hasFieldErrors(errors)).toBe(true);
     expect(errors.title).toBe('Title is required.');
@@ -82,7 +88,7 @@ describe('validateTaskForm', () => {
 
 describe('clearFieldError', () => {
   it('drops the message for one field and keeps the rest', () => {
-    const errors = validateTaskForm(EMPTY_TASK_FORM);
+    const errors = validateTaskForm(form({ title: '', status: '', priority: '' }));
     const remaining = clearFieldError(errors, 'title');
 
     expect(remaining.title).toBeUndefined();

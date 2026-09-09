@@ -119,10 +119,6 @@ function buildDetails(task: Task): DetailVm[] {
   }));
 }
 
-/**
- * The store records failures in state and reports `null`, so a rejected write has to
- * be explained from whatever it kept before the toast can name a reason.
- */
 function failureReason(messages: readonly string[], fallback: string): string {
   if (messages.length > 0) return messages.join(' ');
   return taskStore.getState().serverError?.name ?? fallback;

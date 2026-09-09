@@ -99,7 +99,6 @@ export interface ErrorResponse {
 export interface TaskFormValues {
   title: string;
   description: string;
-  /** Empty until the author picks one, so a missing choice can be reported. */
   status: TaskStatus | '';
   priority: TaskPriority | '';
   dueDate: string;
@@ -140,8 +139,8 @@ export const TASK_PRIORITY_SEVERITY: Record<TaskPriority, TaskSeverity> = {
 export const EMPTY_TASK_FORM: TaskFormValues = {
   title: '',
   description: '',
-  status: '',
-  priority: '',
+  status: 'TODO',
+  priority: 'MEDIUM',
   dueDate: '',
   assignee: '',
   tags: '',
@@ -206,10 +205,6 @@ function toDateTimeLocal(iso: string | null): string {
   );
 }
 
-/**
- * Mirrors the API contract so a rejected write is explained on the field itself
- * rather than arriving as an opaque 400.
- */
 export function validateTaskForm(values: TaskFormValues): TaskFieldErrors {
   const errors: TaskFieldErrors = {};
 

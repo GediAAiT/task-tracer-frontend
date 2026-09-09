@@ -30,12 +30,23 @@ function form(overrides: Partial<TaskFormVm> = {}): TaskFormVm {
 }
 
 describe('TaskFormFields', () => {
-  it('leaves status and priority unpicked so the author has to choose', () => {
+  it('offers a disabled placeholder while a select has no value', () => {
     render(<TaskFormFields form={form()} />);
 
     expect(screen.getByRole('combobox', { name: /status/i })).toHaveValue('');
-    expect(screen.getByRole('combobox', { name: /priority/i })).toHaveValue('');
     expect(screen.getByRole('option', { name: 'Select a status' })).toBeDisabled();
+    expect(screen.getByRole('option', { name: 'Select a priority' })).toBeDisabled();
+  });
+
+  it('drops the placeholder once a value is in place', () => {
+    render(
+      <TaskFormFields form={form({ status: field('TODO'), priority: field('MEDIUM') })} />,
+    );
+
+    expect(screen.getByRole('combobox', { name: /status/i })).toHaveValue('TODO');
+    expect(screen.getByRole('combobox', { name: /priority/i })).toHaveValue('MEDIUM');
+    expect(screen.queryByRole('option', { name: 'Select a status' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Select a priority' })).not.toBeInTheDocument();
   });
 
   it('shows the hint while a field is still clean', () => {

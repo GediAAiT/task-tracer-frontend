@@ -1,7 +1,6 @@
 import type { FieldVm } from '@/app/model/task/view/field.vm';
 import type { TaskFormVm } from '@/app/model/task/view/task-form.vm';
 
-/** Shows the validation reason when there is one, otherwise the standing hint. */
 function FieldNote({ field, hint }: { field: FieldVm; hint?: string }) {
   if (field.error) {
     return (
@@ -54,9 +53,11 @@ export function TaskFormFields({ form }: { form: TaskFormVm }) {
           value={form.status.value}
           onChange={form.status.onChange}
         >
-          <option value="" disabled>
-            Select a status
-          </option>
+          {form.status.value === '' && (
+            <option value="" disabled>
+              Select a status
+            </option>
+          )}
           {form.statusOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -76,9 +77,11 @@ export function TaskFormFields({ form }: { form: TaskFormVm }) {
           value={form.priority.value}
           onChange={form.priority.onChange}
         >
-          <option value="" disabled>
-            Select a priority
-          </option>
+          {form.priority.value === '' && (
+            <option value="" disabled>
+              Select a priority
+            </option>
+          )}
           {form.priorityOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

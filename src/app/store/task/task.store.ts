@@ -186,7 +186,6 @@ function closeTask(): void {
   patchState({ detailTaskId: null, selectedTask: null, selectedLoading: false });
 }
 
-/** Opens the task detail dialog, refreshing the task from the API behind it. */
 async function openTask(id: string): Promise<void> {
   const generation = selectedGuard.next();
   const fromList = state.entities.find((task) => task.id === id) ?? null;
@@ -288,7 +287,6 @@ async function deleteTask(id: string): Promise<boolean> {
   }
 }
 
-/** The edit form replaces the detail dialog so the two never stack. */
 function startEditing(id: string): void {
   patchState({ editingTaskId: id, editErrors: [], detailTaskId: null, selectedLoading: false });
 }
