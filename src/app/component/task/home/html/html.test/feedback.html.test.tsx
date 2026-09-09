@@ -6,7 +6,6 @@ import { FeedbackSection } from '../feedback.html';
 function feedback(overrides: Partial<FeedbackVm> = {}): FeedbackVm {
   return {
     serverError: 'The server is not available, please try again.',
-    status: 'offline',
     retryDisabled: false,
     onRetry: vi.fn(),
     ...overrides,
@@ -20,26 +19,24 @@ describe('FeedbackSection', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('promises the banner will clear itself while the backend is down', () => {
+  it('shows the error message while the backend is down', () => {
     render(<FeedbackSection feedback={feedback()} />);
 
     expect(screen.getByRole('alert')).toHaveTextContent(
       'The server is not available, please try again.',
     );
-    expect(screen.getByRole('status')).toHaveTextContent(/clears itself/i);
   });
 
-  it('marks the banner busy while a probe is in flight', () => {
-    render(<FeedbackSection feedback={feedback({ status: 'checking' })} />);
+  it('keeps the silent reconnect out of the banner', () => {
+    render(<FeedbackSection feedback={feedback()} />);
 
-    expect(screen.getByRole('alert')).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).not.toHaveAttribute('aria-busy');
+    expect(screen.getByRole('alert').textContent).not.toMatch(/reconnect|clears itself|checking/i);
   });
 
-  it('drops the waiting note for an error that is not an outage', () => {
-    render(
-      <FeedbackSection feedback={feedback({ serverError: 'Title is required.', status: 'online' })} />,
-    );
+  it('shows nothing but the message for an error that is not an outage', () => {
+    render(<FeedbackSection feedback={feedback({ serverError: 'Title is required.' })} />);
 
     expect(screen.getByRole('alert')).toHaveTextContent('Title is required.');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();

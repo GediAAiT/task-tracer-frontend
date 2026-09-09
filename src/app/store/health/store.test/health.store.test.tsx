@@ -67,7 +67,7 @@ describe('useBackendConnection', () => {
     expect(backendRecovered).not.toHaveBeenCalled();
   });
 
-  it('reloads the tasks and says so once the API answers again', async () => {
+  it('reloads the tasks silently once the API answers again', async () => {
     fetchBackendHealth.mockRejectedValue(offline());
 
     const { result } = renderHook(() => useBackendConnection(), { wrapper });
@@ -78,10 +78,7 @@ describe('useBackendConnection', () => {
 
     await waitFor(() => expect(result.current).toBe('online'));
     expect(backendRecovered).toHaveBeenCalledTimes(1);
-    expect(success).toHaveBeenCalledWith(
-      'Back online',
-      'The server answered again and the tasks were reloaded.',
-    );
+    expect(success).not.toHaveBeenCalled();
   });
 
   it('recovers when a successful request marks the API reachable', async () => {
@@ -96,7 +93,7 @@ describe('useBackendConnection', () => {
     expect(backendRecovered).toHaveBeenCalledTimes(1);
   });
 
-  it('announces the recovery once, not on every later probe', async () => {
+  it('reconnects once, without notifying on any probe', async () => {
     fetchBackendHealth.mockRejectedValue(offline());
 
     const { result } = renderHook(() => useBackendConnection(), { wrapper });
@@ -107,7 +104,7 @@ describe('useBackendConnection', () => {
     await waitFor(() => expect(result.current).toBe('online'));
     await client.refetchQueries();
 
-    expect(success).toHaveBeenCalledTimes(1);
+    expect(success).not.toHaveBeenCalled();
     expect(backendRecovered).toHaveBeenCalledTimes(1);
   });
 });

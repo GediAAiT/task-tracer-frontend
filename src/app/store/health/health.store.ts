@@ -8,7 +8,6 @@ import {
   type BackendStatus,
 } from '@/app/model/health/health';
 import { fetchBackendHealth } from '@/app/service/health/health.service';
-import { notify } from '@/app/service/notification/notification.service';
 import { taskStoreMethods } from '@/app/store/task/task.store';
 
 export function useBackendConnection(): BackendStatus {
@@ -34,7 +33,6 @@ export function useBackendConnection(): BackendStatus {
     wasOffline.current = false;
 
     void taskStoreMethods.backendRecovered();
-    notify.success('Back online', 'The server answered again and the tasks were reloaded.');
   }, [isError]);
 
   if (!isError) return 'online';

@@ -124,7 +124,7 @@ function failureReason(messages: readonly string[], fallback: string): string {
 export function HomeComponent() {
   const store = useTaskStore();
   const methods = useTaskStoreMethods();
-  const connection = useBackendConnection();
+  useBackendConnection();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [values, setValues] = useState<TaskFormValues>(EMPTY_TASK_FORM);
@@ -475,7 +475,6 @@ export function HomeComponent() {
       }}
       feedback={{
         serverError: store.serverError?.name ?? null,
-        status: connection,
         retryDisabled: store.loading,
         onRetry: () => void handleRetry(),
       }}

@@ -104,7 +104,6 @@ function backendUnreachable(): void {
 }
 
 async function backendRecovered(): Promise<void> {
-  patchState({ serverError: null });
   await refresh();
 }
 
@@ -138,7 +137,7 @@ async function getAllTasks(): Promise<void> {
   const controller = new AbortController();
   listController = controller;
 
-  patchState({ loading: true, serverError: null });
+  patchState({ loading: true });
 
   try {
     const page = await taskService.getAllTasks(state.query, controller.signal);

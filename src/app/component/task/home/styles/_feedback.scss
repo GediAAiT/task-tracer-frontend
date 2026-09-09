@@ -9,14 +9,6 @@
     @apply flex min-w-0 flex-col gap-1;
   }
 
-  .reconnect-note {
-    @apply flex items-center gap-2 text-[0.78rem] text-red-500/90 sm:text-[0.8rem];
-  }
-
-  .reconnect-spinner {
-    @apply size-3 shrink-0 animate-spin rounded-full border-2 border-red-300 border-t-red-600;
-  }
-
   .retry-btn {
     @include button;
     @apply shrink-0 rounded-lg bg-red-600 px-4 py-2 text-[0.8rem] text-white;
