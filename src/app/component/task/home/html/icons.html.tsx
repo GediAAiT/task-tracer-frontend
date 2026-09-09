@@ -1,4 +1,4 @@
-import type { RowIconName, StatusIconName } from '@/app/model/task/view/detail-panel.vm';
+import type { RowIconName, StatusIconName } from '@/app/model/task/view/task-panel.vm';
 
 export function FileIcon() {
   return (

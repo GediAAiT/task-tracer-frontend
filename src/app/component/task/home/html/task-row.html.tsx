@@ -1,8 +1,6 @@
 import type { TaskRowVm } from '@/app/model/task/view/task-row.vm';
-import { DeletePanelSection } from './delete-panel.html';
-import { DetailPanelSection } from './detail-panel.html';
-import { EditPanelSection } from './edit-panel.html';
 import { PersonIcon, RowIcon, StatusIcon } from './icons.html';
+import { TaskPanelsSection } from './task-panels.html';
 
 export function TaskRowSection({ row }: { row: TaskRowVm }) {
   return (
@@ -57,9 +55,7 @@ export function TaskRowSection({ row }: { row: TaskRowVm }) {
         <span className="open-hint">View details</span>
       </div>
 
-      {row.detailPanel && <DetailPanelSection panel={row.detailPanel} />}
-      {row.editPanel && <EditPanelSection panel={row.editPanel} />}
-      {row.deletePanel && <DeletePanelSection panel={row.deletePanel} />}
+      <TaskPanelsSection row={row} />
     </div>
   );
 }

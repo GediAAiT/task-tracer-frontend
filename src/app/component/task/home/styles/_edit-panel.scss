@@ -1,9 +1,0 @@
-@use 'mixins' as *;
-
-.dialog-content.edit-dialog {
-  @apply max-h-[calc(100dvh-3rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-2xl;
-}
-
-.edit-dialog-body {
-  @apply min-h-0 overflow-y-auto;
-}

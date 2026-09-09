@@ -1,3 +1,5 @@
+import type { TaskFormPanelVm } from './task-form.vm';
+
 export type RowIconName = 'user' | 'card' | 'settings' | 'dollar';
 
 export type StatusIconName = 'check' | 'cross' | 'clock';
@@ -16,11 +18,10 @@ export interface ActionVm {
   onSelect: () => void;
 }
 
-export interface DetailPanelVm {
+export interface TaskPanelVm extends TaskFormPanelVm {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
-  description: string;
+  heading: string;
   icon: RowIconName;
   severity: string;
   severityLabel: string;
@@ -29,9 +30,7 @@ export interface DetailPanelVm {
   statusIcon: StatusIconName;
   overdue: boolean;
   isDone: boolean;
-  tags: string[];
   loading: boolean;
   details: DetailVm[];
   actions: ActionVm[];
-  onCancel: () => void;
 }

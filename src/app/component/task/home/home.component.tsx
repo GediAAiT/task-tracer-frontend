@@ -24,17 +24,16 @@ import {
   type TaskStatus,
 } from '@/app/model/task/task';
 import type { DeletePanelVm } from '@/app/model/task/view/delete-panel.vm';
-import type {
-  ActionVm,
-  DetailPanelVm,
-  DetailVm,
-  RowIconName,
-  StatusIconName,
-} from '@/app/model/task/view/detail-panel.vm';
-import type { EditPanelVm } from '@/app/model/task/view/edit-panel.vm';
 import type { FieldVm, OptionVm } from '@/app/model/task/view/field.vm';
 import type { StatCardVm } from '@/app/model/task/view/stat-card.vm';
 import type { TabVm } from '@/app/model/task/view/tab.vm';
+import type {
+  ActionVm,
+  DetailVm,
+  RowIconName,
+  StatusIconName,
+  TaskPanelVm,
+} from '@/app/model/task/view/task-panel.vm';
 import type { TaskRowVm } from '@/app/model/task/view/task-row.vm';
 import { notify } from '@/app/service/notification/notification.service';
 import { taskStore, useTaskStore, useTaskStoreMethods } from '@/app/store/task/task.store';
@@ -70,6 +69,8 @@ const STATUS_ICONS: Record<TaskStatus, StatusIconName> = {
   DONE: 'check',
 };
 
+const TABLE_FROM = 3;
+
 const ICON_KEYWORDS: [string[], RowIconName][] = [
   [['member', 'user'], 'user'],
   [['loan', 'payment'], 'card'],
@@ -102,14 +103,9 @@ function pickIcon(task: Task): RowIconName {
 
 function buildDetails(task: Task): DetailVm[] {
   const entries: Record<string, string> = {
-    assignee: task.assignee ?? 'Unassigned',
-    priority: TASK_PRIORITY_LABELS[task.priority],
-    status: TASK_STATUS_LABELS[task.status],
-    dueDate: formatDate(task.dueDate),
-    completedAt: formatDate(task.completedAt),
     createdAt: formatDate(task.createdAt),
     updatedAt: formatDate(task.updatedAt),
-    tags: task.tags.length > 0 ? task.tags.join(', ') : '—',
+    completedAt: formatDate(task.completedAt),
   };
 
   return Object.entries(entries).map(([key, value]) => ({
@@ -211,21 +207,21 @@ export function HomeComponent() {
     };
   }
 
-  function startEditing(task: Task) {
+  function openTaskPanel(task: Task) {
     setEditValues(toFormValues(task));
     setEditFieldErrors({});
-    methods.startEditing(task.id);
+    void methods.openTask(task.id);
   }
 
-  function cancelEditing() {
+  function closeTaskPanel() {
     setEditValues(null);
     setEditFieldErrors({});
-    methods.cancelEditing();
+    methods.closeTask();
   }
 
   function startDeleting(id: string) {
     methods.clearDeleteErrors();
-    methods.closeTask();
+    closeTaskPanel();
     setDeletingId(id);
   }
 
@@ -254,7 +250,7 @@ export function HomeComponent() {
     if (removed) setDeletingId(null);
   }
 
-  async function handleEditSubmit(id: string, event: React.FormEvent<HTMLFormElement>) {
+  async function handleTaskSubmit(id: string, event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editValues) return;
 
@@ -287,8 +283,8 @@ export function HomeComponent() {
     }
   }
 
-  function changeStatus(id: string, status: TaskStatus) {
-    void notify.run(
+  async function changeStatus(id: string, status: TaskStatus) {
+    const updated = await notify.run(
       methods.updateTask(id, { status }).then((task) => {
         if (!task) {
           throw new Error(
@@ -303,6 +299,11 @@ export function HomeComponent() {
         error: 'Could not update the status',
       },
     );
+
+    if (updated) {
+      setEditValues(null);
+      setEditFieldErrors({});
+    }
   }
 
   async function handleRetry() {
@@ -338,28 +339,19 @@ export function HomeComponent() {
   const priorityOptions = toOptions(TASK_PRIORITIES, TASK_PRIORITY_LABELS);
 
   const rows: TaskRowVm[] = store.allTasks.map((task) => {
-    const showingDetail = store.detailTaskId === task.id;
+    const showingPanel = store.detailTaskId === task.id;
     const current =
-      showingDetail && store.selectedTask?.id === task.id ? store.selectedTask : task;
+      showingPanel && store.selectedTask?.id === task.id ? store.selectedTask : task;
     const saving = store.updatingIds.includes(task.id);
     const deleting = store.deletingIds.includes(task.id);
-    const editing = store.editingTaskId === task.id && editValues !== null;
 
     const actions: ActionVm[] = STATUS_TRANSITIONS[current.status].map((transition) => ({
       key: transition.status,
       label: transition.label,
       modifier: transition.modifier,
       disabled: saving || deleting,
-      onSelect: () => changeStatus(task.id, transition.status),
+      onSelect: () => void changeStatus(task.id, transition.status),
     }));
-
-    actions.push({
-      key: 'EDIT',
-      label: 'Edit',
-      modifier: 'neutral-btn',
-      disabled: saving || deleting,
-      onSelect: () => startEditing(current),
-    });
 
     actions.push({
       key: 'DELETE',
@@ -369,52 +361,41 @@ export function HomeComponent() {
       onSelect: () => startDeleting(task.id),
     });
 
-    const detailPanel: DetailPanelVm | null = showingDetail
-      ? {
-          open: true,
-          onOpenChange: (open) => {
-            if (!open) methods.closeTask();
-          },
-          title: current.title,
-          description: current.description ?? 'No description.',
-          icon: pickIcon(current),
-          severity: TASK_PRIORITY_SEVERITY[current.priority],
-          severityLabel: TASK_PRIORITY_LABELS[current.priority],
-          statusModifier: current.status.toLowerCase(),
-          statusLabel: TASK_STATUS_LABELS[current.status],
-          statusIcon: STATUS_ICONS[current.status],
-          overdue: isOverdue(current),
-          isDone: current.status === 'DONE',
-          tags: current.tags,
-          loading: store.selectedLoading,
-          details: buildDetails(current),
-          actions,
-          onCancel: () => methods.closeTask(),
-        }
-      : null;
-
-    const editPanel: EditPanelVm | null = editing
-      ? {
-          open: true,
-          onOpenChange: (open) => {
-            if (!open) cancelEditing();
-          },
-          submitLabel: saving ? 'Saving…' : 'Save changes',
-          submitDisabled: saving,
-          errors: store.editErrors,
-          title: editField('title'),
-          description: editField('description'),
-          status: editField('status'),
-          priority: editField('priority'),
-          dueDate: editField('dueDate'),
-          assignee: editField('assignee'),
-          tags: editField('tags'),
-          statusOptions,
-          priorityOptions,
-          onSubmit: (event) => void handleEditSubmit(task.id, event),
-          onCancel: cancelEditing,
-        }
-      : null;
+    const taskPanel: TaskPanelVm | null =
+      showingPanel && editValues !== null
+        ? {
+            open: true,
+            onOpenChange: (open) => {
+              if (!open) closeTaskPanel();
+            },
+            heading: current.title,
+            icon: pickIcon(current),
+            severity: TASK_PRIORITY_SEVERITY[current.priority],
+            severityLabel: TASK_PRIORITY_LABELS[current.priority],
+            statusModifier: current.status.toLowerCase(),
+            statusLabel: TASK_STATUS_LABELS[current.status],
+            statusIcon: STATUS_ICONS[current.status],
+            overdue: isOverdue(current),
+            isDone: current.status === 'DONE',
+            loading: store.selectedLoading,
+            details: buildDetails(current),
+            actions,
+            submitLabel: saving ? 'Saving…' : 'Save changes',
+            submitDisabled: saving,
+            errors: store.editErrors,
+            title: editField('title'),
+            description: editField('description'),
+            status: editField('status'),
+            priority: editField('priority'),
+            dueDate: editField('dueDate'),
+            assignee: editField('assignee'),
+            tags: editField('tags'),
+            statusOptions,
+            priorityOptions,
+            onSubmit: (event) => void handleTaskSubmit(task.id, event),
+            onCancel: closeTaskPanel,
+          }
+        : null;
 
     const deletePanel: DeletePanelVm | null =
       deletingId === task.id
@@ -447,14 +428,13 @@ export function HomeComponent() {
       overdue: isOverdue(current),
       isDone: current.status === 'DONE',
       tags: current.tags,
-      detailPanel,
-      editPanel,
+      taskPanel,
       deletePanel,
-      onOpen: () => void methods.openTask(task.id),
+      onOpen: () => openTaskPanel(task),
       onKeyActivate: (event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        void methods.openTask(task.id);
+        openTaskPanel(task);
       },
     };
   });
@@ -496,6 +476,9 @@ export function HomeComponent() {
       }}
       list={{
         visible: !createOpen,
+        layout:
+          Math.max(store.totalTasks, rows.length) >= TABLE_FROM ? 'table' : 'cards',
+        caption: 'Select a task to open its full details.',
         rows,
         showSkeleton: store.loading && store.allTasks.length === 0,
         loading: store.loading && store.allTasks.length > 0,
