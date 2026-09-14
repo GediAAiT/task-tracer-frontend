@@ -12,9 +12,14 @@ import {
   type TaskTab,
   type UpdateTaskInput,
 } from '@/app/model/task/task';
-import type { CacheDiagnostics } from '@/app/model/task/cache';
-import { HttpErrorResponse, NetworkError } from '@/app/service/http/http-client';
+import { BACKEND_HEALTH_KEY, BACKEND_OFFLINE_MESSAGE } from '@/app/model/health/health';
+import {
+  HttpErrorResponse,
+  NetworkError,
+  isBackendUnavailable,
+} from '@/app/service/http/http-client';
 import { taskService } from '@/app/service/task/task.service';
+import { queryClient } from '@/app/store/query-client';
 
 interface TaskState {
   serverError: { name: string } | null;
@@ -22,7 +27,6 @@ interface TaskState {
   loading: boolean;
   entities: Task[];
   meta: PaginationMeta | null;
-  listCache: CacheDiagnostics | null;
   stats: TaskStats | null;
   query: TaskQuery;
   detailTaskId: string | null;
@@ -50,7 +54,6 @@ const initialState: TaskState = {
   loading: false,
   entities: [],
   meta: null,
-  listCache: null,
   stats: null,
   query: DEFAULT_QUERY,
   detailTaskId: null,
@@ -95,12 +98,27 @@ function isAbort(err: unknown): boolean {
   return err instanceof DOMException && err.name === 'AbortError';
 }
 
+function backendUnreachable(): void {
+  if (state.serverError) return;
+  patchState({ serverError: { name: BACKEND_OFFLINE_MESSAGE }, operationSuccess: false });
+}
+
+async function backendRecovered(): Promise<void> {
+  await refresh();
+}
+
+function backendReachable(): void {
+  queryClient.setQueryData(BACKEND_HEALTH_KEY, 200);
+}
+
 function updateServerError(err: unknown): void {
   let name = 'An unexpected error occurred';
   if (err instanceof HttpErrorResponse) name = err.messages.join(', ');
   else if (err instanceof NetworkError) name = err.message;
   else if (err instanceof Error) name = err.message;
   patchState({ serverError: { name }, operationSuccess: false });
+
+  if (isBackendUnavailable(err)) void queryClient.refetchQueries({ queryKey: BACKEND_HEALTH_KEY });
 }
 
 function withoutId(ids: readonly string[], id: string): string[] {
@@ -119,15 +137,15 @@ async function getAllTasks(): Promise<void> {
   const controller = new AbortController();
   listController = controller;
 
-  patchState({ loading: true, serverError: null });
+  patchState({ loading: true });
 
   try {
-    const { page, cache } = await taskService.getAllTasks(state.query, controller.signal);
+    const page = await taskService.getAllTasks(state.query, controller.signal);
     if (listGuard.isStale(generation)) return;
+    backendReachable();
     patchState({
       entities: page.items,
       meta: page.meta,
-      listCache: cache,
       loading: false,
       serverError: null,
     });
@@ -144,6 +162,7 @@ async function getTaskStats(): Promise<void> {
   try {
     const stats = await taskService.getTaskStats();
     if (statsGuard.isStale(generation)) return;
+    backendReachable();
     patchState({ stats });
   } catch (err) {
     if (isAbort(err) || statsGuard.isStale(generation)) return;
@@ -206,6 +225,7 @@ async function openTask(id: string): Promise<void> {
   try {
     const task = await taskService.getTaskById(id);
     if (selectedGuard.isStale(generation)) return;
+    backendReachable();
     patchState({ selectedTask: task, selectedLoading: false });
   } catch (err) {
     if (isAbort(err) || selectedGuard.isStale(generation)) return;
@@ -219,6 +239,7 @@ async function createTask(payload: CreateTaskInput): Promise<Task | null> {
 
   try {
     const task = await taskService.createTask(payload);
+    backendReachable();
     patchState({ creating: false, createErrors: [], operationSuccess: true });
     await refresh();
     return task;
@@ -238,6 +259,7 @@ async function updateTask(id: string, payload: UpdateTaskInput): Promise<Task | 
 
   try {
     const updated = await taskService.updateTask(id, payload);
+    backendReachable();
     patchState({
       entities: state.entities.map((task) => (task.id === id ? updated : task)),
       selectedTask: state.selectedTask?.id === id ? updated : state.selectedTask,
@@ -267,6 +289,7 @@ async function deleteTask(id: string): Promise<boolean> {
 
   try {
     await taskService.deleteTask(id);
+    backendReachable();
     const wasEditing = state.editingTaskId === id;
     patchState({
       entities: state.entities.filter((task) => task.id !== id),
@@ -307,7 +330,10 @@ function clearCreateErrors(): void {
   if (state.createErrors.length > 0) patchState({ createErrors: [] });
 }
 
+
 export const taskStoreMethods = {
+  backendUnreachable,
+  backendRecovered,
   getAllTasks,
   getTaskStats,
   refresh,

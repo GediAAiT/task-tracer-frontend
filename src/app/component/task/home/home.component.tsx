@@ -36,6 +36,7 @@ import type {
 } from '@/app/model/task/view/task-panel.vm';
 import type { TaskRowVm } from '@/app/model/task/view/task-row.vm';
 import { notify } from '@/app/service/notification/notification.service';
+import { useBackendConnection } from '@/app/store/health/health.store';
 import { taskStore, useTaskStore, useTaskStoreMethods } from '@/app/store/task/task.store';
 import './home.component.scss';
 import { HomeTemplate } from './home.html';
@@ -123,6 +124,7 @@ function failureReason(messages: readonly string[], fallback: string): string {
 export function HomeComponent() {
   const store = useTaskStore();
   const methods = useTaskStoreMethods();
+  useBackendConnection();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [values, setValues] = useState<TaskFormValues>(EMPTY_TASK_FORM);
@@ -140,6 +142,7 @@ export function HomeComponent() {
     const timer = setTimeout(() => methods.setSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search, methods]);
+
 
   function field(key: keyof TaskFormValues): FieldVm {
     return {
@@ -472,6 +475,7 @@ export function HomeComponent() {
       }}
       feedback={{
         serverError: store.serverError?.name ?? null,
+        retryDisabled: store.loading,
         onRetry: () => void handleRetry(),
       }}
       list={{

@@ -8,7 +8,6 @@ import type {
   TaskStats,
   UpdateTaskInput,
 } from '@/app/model/task/task';
-import type { CacheDiagnostics } from '@/app/model/task/cache';
 import { HttpErrorResponse, NetworkError } from '@/app/service/http/http-client';
 import { taskService } from '@/app/service/task/task.service';
 
@@ -19,7 +18,6 @@ export interface TaskState {
   meta: PaginationMeta | null;
   listStatus: LoadStatus;
   listError: string | null;
-  listCache: CacheDiagnostics | null;
 
   stats: TaskStats | null;
   statsStatus: LoadStatus;
@@ -43,7 +41,6 @@ const INITIAL_STATE: TaskState = {
   meta: null,
   listStatus: 'idle',
   listError: null,
-  listCache: null,
   stats: null,
   statsStatus: 'idle',
   statsError: null,
@@ -97,12 +94,11 @@ async function loadTasks(): Promise<void> {
   setState({ listStatus: 'loading', listError: null });
 
   try {
-    const { page, cache } = await taskService.getAllTasks(state.query, controller.signal);
+    const page = await taskService.getAllTasks(state.query, controller.signal);
     if (generation !== listGeneration) return;
     setState({
       items: page.items,
       meta: page.meta,
-      listCache: cache,
       listStatus: 'ready',
       listError: null,
     });
